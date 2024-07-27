@@ -16,8 +16,8 @@ def clicker():
         if exit_flag:
             break
         if clicking:
-            mouse.click(Button.right, 1)
-        time.sleep(0.01)
+            mouse.click(Button.left, 1)
+        time.sleep(0.1)
 
 
 def toggle_event(key):
