@@ -8,8 +8,8 @@ from config import *
 
 
 def clicker():
-    global exit_flag, x, y, sleep_time
-    while True:
+    global exit_flag, click_all
+    while click_all < click_max:
         if exit_flag:
             break
         if clicking:
@@ -20,6 +20,8 @@ def clicker():
             clicks = random.randint(1, 5)
 
             pyautogui.click(x, y, clicks)
+
+            click_all += clicks
         sleep_time = random.uniform(0.1, 0.5)
         time.sleep(sleep_time)
 
@@ -28,10 +30,11 @@ def toggle_event(key):
     global clicking, exit_flag
     if key == toggle_key:
         clicking = not clicking
-        print('Clicking:', clicking)
+        print('Clicking:', clicking,
+               f', Clicks: {click_all}')
     elif key == exit_key:
         exit_flag = True
-        print('Exiting...')
+        print(f'Exiting...Clicks: {click_all}')
         return False
 
 
