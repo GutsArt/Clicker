@@ -8,22 +8,34 @@ from config import *
 
 
 def clicker():
-    global exit_flag, click_all
-    while click_all < click_max:
-        if exit_flag:
-            break
-        if clicking:
-            # Случайные координаты
-            x = random.randint(1760, 1910)
-            y = random.randint(895, 995)
+    global exit_flag, click_all, click_max
 
-            clicks = random.randint(1, 5)
+    while True:
+        while click_all < click_max:
+            if exit_flag:
+                break
+            if clicking:
+                # Случайные координаты
+                x = random.randint(1760, 1910)
+                y = random.randint(895, 995)
 
-            pyautogui.click(x, y, clicks)
+                clicks = random.randint(1, 5)
 
-            click_all += clicks
-        sleep_time = random.uniform(0.1, 0.5)
-        time.sleep(sleep_time)
+                pyautogui.click(x, y, clicks, 0.1, button="SECONDARY")
+
+                click_all += clicks
+            sleep_time = random.uniform(0.1, 0.5)
+            time.sleep(sleep_time)
+        # if exit_flag:
+        #     break
+        current_time = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())
+        print("Current Time:", current_time)
+
+        print(f"+{click_all}")
+        click_all = 0
+
+        time_pause = random.randint(5, 10)
+        time.sleep(time_pause * 60)
 
 
 def toggle_event(key):
