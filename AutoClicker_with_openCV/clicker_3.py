@@ -1,5 +1,8 @@
 import pyautogui
 import time
+import threading
+from pynput.keyboard import Listener
+from config import *
 
 image_paths = [
     'SCREENS/screen1.png',
@@ -9,46 +12,76 @@ image_paths = [
     'SCREENS/screen5.png',
     'SCREENS/screen6.png'
 ]
-def main(image_paths):
-    i = 0
-    # Применение функции ко всем изображениям
-    for index, path in enumerate(image_paths):
-        find_and_click_image(path, i)  # Обычный клик для остальных
-        i += 10
-        pyautogui.sleep(1)  # Задержка между кликами
-    click_Hamser(image_paths[5])
 
-    print("Скрипт завершен.")
-
-def find_and_click_image(image_path, time, confidence=0.7):
+def find_and_click_image(image_path, confidence=0.7):
     try:
-        button = pyautogui.locateOnScreen(image_path, time, confidence=confidence, region=(1740, 760, 180, 320))
-        if button:
+        if (button := pyautogui.locateOnScreen(image_path, confidence=confidence, region=(1740, 760, 180, 320))):
             pyautogui.click(button, button='right')
             print(f"Клик выполнен для {image_path}.")
         else:
             print(f"Изображение {image_path} не найдено на экране.")
     except pyautogui.PyAutoGUIException as e:
-        print(f"Ошибка при обработке {image_path}: ", e)
+        print(f"Ошибка при обработке {image_path}: {e}")
 
-
-def click_Hamser(image_path, clicks=500, delay=0.25, confidence=0.75, region=(1740, 760, 180, 320)):
-    try:
-        button = pyautogui.locateOnScreen(image_path, confidence=confidence, region=region)
-        if button:
-            while True:
-                for _ in range(clicks):
-                    pyautogui.click(button, button='SECONDARY')
-                    pyautogui.sleep(delay)
-
+def click_Hamser(image_path, clicks=5, all_clicks=500, delay=0.25, confidence=0.75, region=(1740, 760, 180, 320)):
+    i = 0
+    while (i < all_clicks) and (clicking):
+        try:
+            if (button := pyautogui.locateOnScreen(image_path, confidence=confidence, region=region)):
+                pyautogui.click(button, clicks=clicks, interval=delay, button='right')
+                time.sleep(delay)
                 current_time = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())
                 print("Current Time:", current_time)
-                pyautogui.sleep(10 * 60)
-        else:
-            print(f"Изображение {image_path} не найдено на экране.")
-    except pyautogui.PyAutoGUIException as e:
-        print(f"Ошибка при обработке {image_path}: ", e)
+                i += clicks
+            else:
+                print(f"Изображение {image_path} не найдено на экране.")
+                time.sleep(15)
+                # break
+        except pyautogui.PyAutoGUIException as e:
+            print(f"Ошибка при обработке {image_path}: {e}")
 
+
+
+
+
+
+def on_press(key):
+    global clicking, exit_flag
+    if key == toggle_key:
+        clicking = not clicking
+        print("Скрипт запущен." if clicking else "Скрипт остановлен.")
+    elif key == exit_key:
+        exit_flag = True
+        print("Выход из скрипта.")
+        return False  # Остановить слушатель
+
+def main(image_paths):
+    global clicking, exit_flag
+    while True:
+        if exit_flag:
+            break
+        if clicking:
+            for path in image_paths:
+                find_and_click_image(path)
+                time.sleep(1)
+            click_Hamser(image_paths[5])
+        else:
+            time.sleep(10)
+            print("else:")
+            # break
+
+def listen_for_keys():
+    with Listener(on_press=on_press) as listener:
+        listener.join()
 
 if __name__ == "__main__":
-    main(image_paths)
+    listener_thread = threading.Thread(target=listen_for_keys, daemon=True)
+    listener_thread.start()
+
+    try:
+        main(image_paths)
+    except KeyboardInterrupt:
+        exit_flag = True
+        print("Прерывание работы скрипта.")
+    finally:
+        listener_thread.join()
