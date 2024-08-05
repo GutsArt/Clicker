@@ -39,6 +39,7 @@ def click_Hamser(image_path, clicks=5, all_clicks=500, delay=0.25, confidence=0.
                 # break
         except pyautogui.PyAutoGUIException as e:
             print(f"Ошибка при обработке {image_path}: {e}")
+            break
 
 
 
