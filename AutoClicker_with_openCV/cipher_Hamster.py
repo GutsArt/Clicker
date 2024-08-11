@@ -21,9 +21,6 @@ def get_iform_cipher_Hamster():
     response = requests.get(link)
     if response.status_code == 200:
         soup = BeautifulSoup(response.content, "html.parser")
-        # Parse the page to extract the cipher and combo code
-        # This is a placeholder, you need to replace it with the actual HTML structure
-
         if (ul_element := soup.find_all("ul", class_="wp-block-list")[1]):
             cipher_codes = []
             li_elements = ul_element.find_all("li")
