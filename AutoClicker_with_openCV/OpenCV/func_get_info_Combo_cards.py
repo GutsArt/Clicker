@@ -5,19 +5,22 @@ from matplotlib import pyplot as plt
 import numpy as np
 import re
 import json
+from datetime import datetime
+import threading
+from pynput import keyboard
 
 from config import *
 
 # Укажите путь к Tesseract OCR, если он не находится в системном пути
-pytesseract.pytesseract.tesseract_cmd = 'tesseract'
+pytesseract.pytesseract.tesseract_cmd = r'C:\Users\artem\AppData\Local\Programs\Tesseract-OCR\tesseract'
 
 
 def find_image(img_path, region=region, confidence=0.9):
     try:
+        sleep(sleep_time)
         if (button := pyautogui.locateOnScreen(img_path, region=region, confidence=confidence)):
             pyautogui.click(button, button='right')
             print(f"Клик выполнен для {img_path}.")
-            pyautogui.sleep(sleep_time)
             return True
         else:
             print(f"Изображение {img_path} не найдено на экране.")
@@ -25,8 +28,16 @@ def find_image(img_path, region=region, confidence=0.9):
         print(f"Ошибка при обработке {img_path}: {e}")
 
 
+def press_down(number_down):
+    find_image("Hamster Kombat.png")
+    for _ in range(number_down):
+        pyautogui.press('down')
+        sleep(0.1)
+
+
 def get_price(region):
     try:
+        sleep(sleep_time)
         screenshot = pyautogui.screenshot(region=region)
         img = cv2.cvtColor(np.array(screenshot), cv2.COLOR_RGB2BGR)
         # Проверяем, удалось ли загрузить изображение
@@ -137,14 +148,15 @@ def create_json(json_filename, img_path, plus_number, price_number):
     data["PR&Team"][img_path] = {
         "profit": f"+{plus_number}" if plus_number else None,
         "price": f"{price_number}" if price_number else None,
-        "efficiency": f"{int(plus_number) / int(price_number):.5f}" if price_number != 0 else None
+        "efficiency": f"{(int(plus_number) * 100) / int(price_number):.5f}" if price_number != 0 else None
     }
 
     with open(json_filename, 'w') as file:
         json.dump(data, file, indent=2)
 
 
-sleep_time = 2
+def sleep(time):
+    pyautogui.sleep(time)
 
 
 def process_image(img_path, max_attempts=3):
@@ -159,29 +171,129 @@ def process_image(img_path, max_attempts=3):
             region_money = (x1, y1, x2 - x1, y2 - y1)
             plus_number, price_number = extract_numbers(get_price(region_money))
 
-            create_json("PS&Team.json", img_path, plus_number, price_number)
+            create_json("PR&Team.json", img_path, plus_number, price_number)
 
-            pyautogui.sleep(sleep_time)
             find_image("BACK.png")
-            pyautogui.sleep(sleep_time)
             break  # Выходим из цикла, если изображение найдено
         else:
             print(f"Изображение не найдено, попытка {attempts + 1}/{max_attempts}. Прокручиваем вниз...")
-            for _ in range(10):
-                pyautogui.press('down')
-                pyautogui.sleep(0.1)
-            pyautogui.sleep(sleep_time)
+            press_down(10)
+            sleep(sleep_time)
             attempts += 1
 
     if attempts == max_attempts:
         print(f"Не удалось найти изображение {img_path} после {max_attempts} попыток.")
 
 
+def find_best_efficiency(my_coins):
+    try:
+        # Преобразуем доступные монеты в целое число, если они не в формате числа
+        my_coins = int(my_coins)
+
+        with open("PR&Team.json", 'r') as file:
+            data = json.load(file)
+            best_efficiency = 0
+            best_image = None
+            best_price = None
+
+            for img_path, values in data["PR&Team"].items():
+                try:
+                    efficiency = float(values["efficiency"])
+                    price = int(values["price"])  # Преобразуем цену в целое число
+
+                    if efficiency > best_efficiency and price <= my_coins:
+                        best_efficiency = efficiency
+                        best_image = img_path
+                        best_price = price
+                except ValueError:
+                    print(f"Невозможно преобразовать цену в целое число для {img_path}: {values['price']}")
+                    continue  # Пропускаем итерацию, если цена не является числом
+
+            if best_image:
+                remaining_coins = my_coins - best_price
+                print(f"Лучшее изображение: {best_image} с эффективностью: {best_efficiency}")
+                print(f"Цена: {best_price}, оставшиеся монеты: {remaining_coins}")
+                return best_image, remaining_coins
+            else:
+                print("Не найдено изображение с наилучшей эффективностью в пределах доступных монет.")
+                return None, my_coins
+    except Exception as e:
+        print(f"Ошибка при поиске лучшей эффективности: {str(e)}")
+        return None, my_coins
+
+
 def main():
-    find_image("PS&Team.png")
-    for img_path in imgs:
-        process_image(img_path)
+    try:
+        while CLICKING:
+            if not find_image("BINANCE.png"):
+                print("Не удалось найти изображение BINANCE.png, завершение работы.")
+                break
+
+            x, y = 1770, 850
+            x1, y1 = 1880, 870
+            my_coins = get_price((x, y, x1 - x, y1 - y)) or 1000
+            print(f"Текущий баланс монет: {my_coins}")
+
+            if not find_image("MINING.png"):
+                print("Не удалось найти изображение MINING.png, завершение работы.")
+                break
+
+            if not find_image("PR&Team.png"):
+                print("Не удалось найти изображение PR&Team.png, завершение работы.")
+                break
+
+            for img_path in imgs:
+                process_image(img_path)
+
+            if not find_image("PR&Team.png"):
+                print("Не удалось найти изображение PR&Team.png, завершение работы.")
+                break
+
+            best_img, remaining_money = find_best_efficiency(my_coins)
+            if best_img:
+                max_attempts = 10
+                attempts = 0
+                while attempts < max_attempts:
+                    if find_image(best_img):
+                        break
+                    press_down(5)
+                    attempts += 1
+
+                if attempts == max_attempts:
+                    print("Изображение не найдено после 10 попыток")
+                    break
+
+                if not find_image("GET.png"):
+                    print("Не удалось найти изображение GET.png, завершение работы.")
+                    break
+
+                if remaining_money <= 45_000_000:
+                    print("Достаточно денег для завершения работы.")
+                    break
+                else:
+                    print(f"Time: {datetime.now().strftime("%Y-%m-%d %H:%M:%S")} Money: {remaining_money}")
+                    sleep(sleep_time)
+        print(datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
+    except Exception as e:
+        print(f"Ошибка при работе с изображениями: {str(e)}")
+
+
+def on_press(key):
+    global CLICKING, exit_flag
+    if key == toggle_key:
+        CLICKING = not CLICKING
+        print(f"Автоклик {'включен' if CLICKING else 'выключен'}.")
+        if CLICKING:
+            threading.Thread(target=main).start()
+    elif key == exit_key:
+        exit_flag = True
+        return False
+
+
+def listen_keyboard():
+    with keyboard.Listener(on_press=on_press) as listener:
+        listener.join()
 
 
 if __name__ == "__main__":
-    main()
+    listen_keyboard()
