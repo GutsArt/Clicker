@@ -35,6 +35,13 @@ def press_down(number_down):
         sleep(0.1)
 
 
+def press_up(number_up):
+    find_image("Hamster Kombat.png")
+    for _ in range(number_up):
+        pyautogui.press('up')
+        sleep(0.1)
+
+
 def get_price(region):
     try:
         sleep(sleep_time)
@@ -159,17 +166,30 @@ def sleep(time):
     pyautogui.sleep(time)
 
 
-def process_image(img_path, max_attempts=3):
+def process_image(img_path, max_attempts=6):
     attempts = 0
     while attempts < max_attempts:
         result = find_image(img_path)
         if result:
             print(f"Изображение найдено в позиции: {result}")
             # Определяем область для поиска цены
-            x1, y1 = 1780, 900
-            x2, y2 = 1855, 1000
+            x1, y1 = 1770, 900
+            x2, y2 = 1860, 1000
             region_money = (x1, y1, x2 - x1, y2 - y1)
-            plus_number, price_number = extract_numbers(get_price(region_money))
+            price_text = get_price(region_money)
+            # print(f"\033[91m{price_text}\033[0m")
+            # print(f"Тип данных: {type(price_text)}")
+            if not price_text:
+                print(f"Не удалось распознать цену для {img_path}. Пропускаем этот элемент.")
+                find_image("BACK.png")
+                break
+
+            plus_number, price_number = extract_numbers(price_text)
+
+            if plus_number is None and price_number is None:
+                print(f"Не удалось извлечь числа из текста: {price_text}. Пропускаем этот элемент.")
+                find_image("BACK.png")
+                break
 
             create_json("PR&Team.json", img_path, plus_number, price_number)
 
@@ -177,7 +197,7 @@ def process_image(img_path, max_attempts=3):
             break  # Выходим из цикла, если изображение найдено
         else:
             print(f"Изображение не найдено, попытка {attempts + 1}/{max_attempts}. Прокручиваем вниз...")
-            press_down(10)
+            press_down(5)
             sleep(sleep_time)
             attempts += 1
 
@@ -224,19 +244,19 @@ def find_best_efficiency(my_coins):
 
 def main():
     try:
+        if not find_image("MINING.png"):
+            print("Не удалось найти изображение MINING.png, завершение работы.")
         while CLICKING:
-            if not find_image("BINANCE.png"):
-                print("Не удалось найти изображение BINANCE.png, завершение работы.")
+            if not find_image("PR&Team.png"):
+                print("Не удалось найти изображение PR&Team.png, завершение работы.")
                 break
 
-            x, y = 1770, 850
-            x1, y1 = 1880, 870
+            press_up(20)
+
+            x, y = 1770, 895
+            x1, y1 = 1875, 920
             my_coins = get_price((x, y, x1 - x, y1 - y)) or 1000
             print(f"Текущий баланс монет: {my_coins}")
-
-            if not find_image("MINING.png"):
-                print("Не удалось найти изображение MINING.png, завершение работы.")
-                break
 
             if not find_image("PR&Team.png"):
                 print("Не удалось найти изображение PR&Team.png, завершение работы.")
@@ -267,7 +287,7 @@ def main():
                     print("Не удалось найти изображение GET.png, завершение работы.")
                     break
 
-                if remaining_money <= 45_000_000:
+                if remaining_money <= 15_000_000:
                     print("Достаточно денег для завершения работы.")
                     break
                 else:
