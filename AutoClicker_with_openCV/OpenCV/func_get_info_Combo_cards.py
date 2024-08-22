@@ -166,7 +166,7 @@ def sleep(time):
     pyautogui.sleep(time)
 
 
-def process_image(img_path, max_attempts=6):
+def process_image(img_path, max_attempts=10):
     attempts = 0
     while attempts < max_attempts:
         result = find_image(img_path)
@@ -179,10 +179,13 @@ def process_image(img_path, max_attempts=6):
             price_text = get_price(region_money)
             # print(f"\033[91m{price_text}\033[0m")
             # print(f"Тип данных: {type(price_text)}")
-            if not price_text:
+            if len(price_text) < 2:
                 print(f"Не удалось распознать цену для {img_path}. Пропускаем этот элемент.")
+                sleep(sleep_time * 10)
+                price_text = get_price(region_money)
+                if len(price_text) < 2:
+                    break
                 find_image("BACK.png")
-                break
 
             plus_number, price_number = extract_numbers(price_text)
 
@@ -191,7 +194,9 @@ def process_image(img_path, max_attempts=6):
                 find_image("BACK.png")
                 break
 
-            create_json("PR&Team.json", img_path, plus_number, price_number)
+            if not create_json("PR&Team.json", img_path, plus_number, price_number):
+                find_image("BACK.png")
+                break
 
             find_image("BACK.png")
             break  # Выходим из цикла, если изображение найдено
@@ -202,7 +207,9 @@ def process_image(img_path, max_attempts=6):
             attempts += 1
 
     if attempts == max_attempts:
+        find_image("PR&Team.png")
         print(f"Не удалось найти изображение {img_path} после {max_attempts} попыток.")
+        sleep(sleep_time * 10)
 
 
 def find_best_efficiency(my_coins):
@@ -242,6 +249,16 @@ def find_best_efficiency(my_coins):
         return None, my_coins
 
 
+def smart_find(best_img, max_attempts=11, attempts=0):
+    while attempts < max_attempts:
+        if find_image(best_img):
+            break
+        press_down(5)
+        attempts += 1
+    if attempts == max_attempts:
+        print("Изображение не найдено после 11 попыток")
+
+
 def main():
     try:
         if not find_image("MINING.png"):
@@ -253,10 +270,17 @@ def main():
 
             press_up(20)
 
+            sleep(5)
+
             x, y = 1770, 895
             x1, y1 = 1875, 920
-            my_coins = get_price((x, y, x1 - x, y1 - y)) or 1000
+            my_coins = get_price((x, y, x1 - x, y1 - y))
             print(f"Текущий баланс монет: {my_coins}")
+            if not my_coins:
+                break
+
+            if int(my_coins) <= 20_000_000:
+                break
 
             if not find_image("PR&Team.png"):
                 print("Не удалось найти изображение PR&Team.png, завершение работы.")
@@ -269,33 +293,57 @@ def main():
                 print("Не удалось найти изображение PR&Team.png, завершение работы.")
                 break
 
+            sleep(sleep_time * 2)
+
             best_img, remaining_money = find_best_efficiency(my_coins)
             if best_img:
-                max_attempts = 10
-                attempts = 0
-                while attempts < max_attempts:
-                    if find_image(best_img):
-                        break
-                    press_down(5)
-                    attempts += 1
-
-                if attempts == max_attempts:
-                    print("Изображение не найдено после 10 попыток")
-                    break
+                smart_find(best_img)
 
                 if not find_image("GET.png"):
                     print("Не удалось найти изображение GET.png, завершение работы.")
                     break
 
-                if remaining_money <= 15_000_000:
+                smart_find(best_img)
+
+                x1, y1 = 1770, 900
+                x2, y2 = 1860, 1000
+                region_money = (x1, y1, x2 - x1, y2 - y1)
+                price_text = get_price(region_money)
+                # print(f"\033[91m{price_text}\033[0m")
+                # print(f"Тип данных: {type(price_text)}")
+                if len(price_text) < 2:
+                    print(f"Не удалось распознать цену для {best_img}. Пропускаем этот элемент.")
+                    sleep(sleep_time * 10)
+                    price_text = get_price(region_money)
+                    if len(price_text) < 2:
+                        break
+                    find_image("BACK.png")
+
+                plus_number, price_number = extract_numbers(price_text)
+
+                if plus_number is None and price_number is None:
+                    print(f"Не удалось извлечь числа из текста: {price_text}. Пропускаем этот элемент.")
+                    find_image("BACK.png")
+                    break
+
+                if not create_json("PR&Team.json", best_img, plus_number, price_number):
+                    find_image("BACK.png")
+                    break
+
+                find_image("BACK.png")
+
+                if remaining_money <= 20_000_000:
                     print("Достаточно денег для завершения работы.")
                     break
                 else:
                     print(f"Time: {datetime.now().strftime("%Y-%m-%d %H:%M:%S")} Money: {remaining_money}")
-                    sleep(sleep_time)
+                    sleep(sleep_time * 60)
         print(datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
     except Exception as e:
         print(f"Ошибка при работе с изображениями: {str(e)}")
+    finally:
+        sleep(sleep_time * 60)
+        main()
 
 
 def on_press(key):
