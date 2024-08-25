@@ -212,41 +212,74 @@ def process_image(img_path, max_attempts=10):
         sleep(sleep_time * 10)
 
 
-def find_best_efficiency(my_coins):
+# def find_best_efficiency(my_coins):
+#     try:
+#         # Преобразуем доступные монеты в целое число, если они не в формате числа
+#         my_coins = int(my_coins)
+#
+#         with open("PR&Team.json", 'r') as file:
+#             data = json.load(file)
+#             best_efficiency = 0
+#             best_image = None
+#             best_price = None
+#
+#             for img_path, values in data["PR&Team"].items():
+#                 try:
+#                     efficiency = float(values["efficiency"])
+#                     price = int(values["price"])  # Преобразуем цену в целое число
+#
+#                     if efficiency > best_efficiency and price <= my_coins:
+#                         best_efficiency = efficiency
+#                         best_image = img_path
+#                         best_price = price
+#                 except ValueError:
+#                     print(f"Невозможно преобразовать цену в целое число для {img_path}: {values['price']}")
+#                     continue  # Пропускаем итерацию, если цена не является числом
+#
+#             if best_image:
+#                 remaining_coins = my_coins - best_price
+#                 print(f"Лучшее изображение: {best_image} с эффективностью: {best_efficiency}")
+#                 print(f"Цена: {best_price}, оставшиеся монеты: {remaining_coins}")
+#                 return best_image, remaining_coins
+#             else:
+#                 print("Не найдено изображение с наилучшей эффективностью в пределах доступных монет.")
+#                 return None, my_coins
+#     except Exception as e:
+#         print(f"Ошибка при поиске лучшей эффективности: {str(e)}")
+#         return None, my_coins
+
+
+def find_best_efficiency(my_coins, top_n=10):
     try:
         # Преобразуем доступные монеты в целое число, если они не в формате числа
         my_coins = int(my_coins)
 
         with open("PR&Team.json", 'r') as file:
             data = json.load(file)
-            best_efficiency = 0
-            best_image = None
-            best_price = None
+            efficiencies = []
 
             for img_path, values in data["PR&Team"].items():
                 try:
                     efficiency = float(values["efficiency"])
                     price = int(values["price"])  # Преобразуем цену в целое число
 
-                    if efficiency > best_efficiency and price <= my_coins:
-                        best_efficiency = efficiency
-                        best_image = img_path
-                        best_price = price
+                    if price <= my_coins:
+                        efficiencies.append((img_path, efficiency, price))
                 except ValueError:
-                    print(f"Невозможно преобразовать цену в целое число для {img_path}: {values['price']}")
-                    continue  # Пропускаем итерацию, если цена не является числом
+                    print(f"Невозможно преобразовать цену в целое число для {img_path}")
 
-            if best_image:
-                remaining_coins = my_coins - best_price
-                print(f"Лучшее изображение: {best_image} с эффективностью: {best_efficiency}")
-                print(f"Цена: {best_price}, оставшиеся монеты: {remaining_coins}")
-                return best_image, remaining_coins
-            else:
-                print("Не найдено изображение с наилучшей эффективностью в пределах доступных монет.")
-                return None, my_coins
+            # Сортируем по эффективности в порядке убывания и берем топ N
+            top_efficiencies = sorted(efficiencies, key=lambda x: x[1], reverse=True)[:top_n]
+
+            for img_path, efficiency, price in top_efficiencies:
+                print(f"Изображение: {img_path}, Эффективность: {efficiency}, Цена: {price}")
+
+        print(top_efficiencies)
+
+        return top_efficiencies
     except Exception as e:
-        print(f"Ошибка при поиске лучшей эффективности: {str(e)}")
-        return None, my_coins
+        print(f"Ошибка: {str(e)}")
+        return None
 
 
 def smart_find(best_img, max_attempts=11, attempts=0):
@@ -257,7 +290,9 @@ def smart_find(best_img, max_attempts=11, attempts=0):
         attempts += 1
     if attempts == max_attempts:
         print("Изображение не найдено после 11 попыток")
-
+        return None
+    else:
+        return True
 
 def main():
     try:
@@ -268,9 +303,9 @@ def main():
                 print("Не удалось найти изображение PR&Team.png, завершение работы.")
                 break
 
-            press_up(20)
+            press_up(50)
 
-            sleep(5)
+            sleep(1)
 
             x, y = 1770, 895
             x1, y1 = 1875, 920
@@ -279,65 +314,69 @@ def main():
             if not my_coins:
                 break
 
-            if int(my_coins) <= 20_000_000:
+            if int(my_coins) <= 1_000_000:
                 break
 
             if not find_image("PR&Team.png"):
                 print("Не удалось найти изображение PR&Team.png, завершение работы.")
                 break
 
-            for img_path in imgs:
-                process_image(img_path)
-
-            if not find_image("PR&Team.png"):
-                print("Не удалось найти изображение PR&Team.png, завершение работы.")
-                break
+            # for img_path in imgs:
+            #     process_image(img_path)
+            #
+            # if not find_image("PR&Team.png"):
+            #     print("Не удалось найти изображение PR&Team.png, завершение работы.")
+            #     break
 
             sleep(sleep_time * 2)
 
-            best_img, remaining_money = find_best_efficiency(my_coins)
-            if best_img:
-                smart_find(best_img)
+            # best_img, remaining_money = find_best_efficiency(my_coins)
+            best_images = find_best_efficiency(my_coins)
+            for best_img, efficiency, price in best_images:
+                if best_img:
+                    find_image("PR&Team.png")
 
-                if not find_image("GET.png"):
-                    print("Не удалось найти изображение GET.png, завершение работы.")
-                    break
+                    if not smart_find(best_img):
+                        print(f"Не удалось найти изображение |{best_img}|, пробуем следующее.")
+                        continue  # Переходим к следующему изображению
 
-                smart_find(best_img)
+                    if not find_image("GET.png"):
+                        print("Не удалось найти изображение GET.png, завершение работы.")
+                        break
 
-                x1, y1 = 1770, 900
-                x2, y2 = 1860, 1000
-                region_money = (x1, y1, x2 - x1, y2 - y1)
-                price_text = get_price(region_money)
-                # print(f"\033[91m{price_text}\033[0m")
-                # print(f"Тип данных: {type(price_text)}")
-                if len(price_text) < 2:
-                    print(f"Не удалось распознать цену для {best_img}. Пропускаем этот элемент.")
-                    sleep(sleep_time * 10)
+                    x1, y1 = 1770, 900
+                    x2, y2 = 1860, 1000
+                    region_money = (x1, y1, x2 - x1, y2 - y1)
                     price_text = get_price(region_money)
                     if len(price_text) < 2:
+                        print(f"Не удалось распознать цену для {best_img}. Пропускаем этот элемент.")
+                        sleep(sleep_time * 10)
+                        price_text = get_price(region_money)
+                        if len(price_text) < 2:
+                            break
+                        find_image("BACK.png")
+
+                    plus_number, price_number = extract_numbers(price_text)
+
+                    if plus_number is None and price_number is None:
+                        print(f"Не удалось извлечь числа из текста: {price_text}. Пропускаем этот элемент.")
+                        find_image("BACK.png")
                         break
+
+                    if not create_json("PR&Team.json", best_img, plus_number, price_number):
+                        find_image("BACK.png")
+                        break
+
                     find_image("BACK.png")
 
-                plus_number, price_number = extract_numbers(price_text)
+                    remaining_money = my_coins - price
+                    if remaining_money <= 1_000_000:
+                        print("Достаточно денег для завершения работы.")
+                        break
+                    else:
+                        print(f"Time: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')} Money: {remaining_money}")
+                        sleep(sleep_time * 60)
 
-                if plus_number is None and price_number is None:
-                    print(f"Не удалось извлечь числа из текста: {price_text}. Пропускаем этот элемент.")
-                    find_image("BACK.png")
-                    break
-
-                if not create_json("PR&Team.json", best_img, plus_number, price_number):
-                    find_image("BACK.png")
-                    break
-
-                find_image("BACK.png")
-
-                if remaining_money <= 20_000_000:
-                    print("Достаточно денег для завершения работы.")
-                    break
-                else:
-                    print(f"Time: {datetime.now().strftime("%Y-%m-%d %H:%M:%S")} Money: {remaining_money}")
-                    sleep(sleep_time * 60)
         print(datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
     except Exception as e:
         print(f"Ошибка при работе с изображениями: {str(e)}")
