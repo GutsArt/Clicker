@@ -336,48 +336,59 @@ def main():
                 if best_img:
                     find_image("PR&Team.png")
 
+                    sleep(5)
+
                     if not smart_find(best_img):
                         print(f"Не удалось найти изображение |{best_img}|, пробуем следующее.")
                         continue  # Переходим к следующему изображению
 
                     if not find_image("GET.png"):
                         print("Не удалось найти изображение GET.png, завершение работы.")
-                        break
+                        continue
 
-                    x1, y1 = 1770, 900
-                    x2, y2 = 1860, 1000
-                    region_money = (x1, y1, x2 - x1, y2 - y1)
-                    price_text = get_price(region_money)
-                    if len(price_text) < 2:
-                        print(f"Не удалось распознать цену для {best_img}. Пропускаем этот элемент.")
-                        sleep(sleep_time * 10)
+                    sleep(5)
+
+                    if not smart_find(best_img):
+                        print(f"Не удалось найти изображение |{best_img}|, пробуем следующее.")
+                        continue
+                    else:
+                        x1, y1 = 1770, 900
+                        x2, y2 = 1860, 1000
+                        region_money = (x1, y1, x2 - x1, y2 - y1)
                         price_text = get_price(region_money)
                         if len(price_text) < 2:
-                            break
-                        find_image("BACK.png")
+                            print(f"Не удалось распознать цену для {best_img}. Пропускаем этот элемент.")
+                            sleep(sleep_time * 10)
+                            price_text = get_price(region_money)
+                            if len(price_text) < 2:
+                                continue
+                            find_image("BACK.png")
 
-                    plus_number, price_number = extract_numbers(price_text)
+                        plus_number, price_number = extract_numbers(price_text)
 
-                    if plus_number is None and price_number is None:
-                        print(f"Не удалось извлечь числа из текста: {price_text}. Пропускаем этот элемент.")
-                        find_image("BACK.png")
-                        break
+                        if plus_number is None and price_number is None:
+                            print(f"Не удалось извлечь числа из текста: {price_text}. Пропускаем этот элемент.")
+                            find_image("BACK.png")
+                            continue
 
-                    if not create_json("PR&Team.json", best_img, plus_number, price_number):
-                        find_image("BACK.png")
-                        break
+                        if not create_json("PR&Team.json", best_img, plus_number, price_number):
+                            find_image("BACK.png")
+                            continue
 
                     find_image("BACK.png")
 
                     remaining_money = my_coins - price
                     if remaining_money <= 1_000_000:
                         print("Достаточно денег для завершения работы.")
-                        break
+                        continue
                     else:
-                        print(f"Time: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')} Money: {remaining_money}")
+                        print(f"Time: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')} Money: {remaining_money}"
+                              f"{remaining_money} <= {1_000_000}")
                         sleep(sleep_time * 60)
 
         print(datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
+        print("Программа завершена."
+              "_"*100)
     except Exception as e:
         print(f"Ошибка при работе с изображениями: {str(e)}")
     finally:
