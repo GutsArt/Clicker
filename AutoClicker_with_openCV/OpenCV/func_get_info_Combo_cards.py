@@ -364,7 +364,12 @@ def main():
                                 continue
                             find_image("BACK.png")
 
-                        plus_number, price_number = extract_numbers(price_text)
+                        try:
+                            plus_number, price_number = extract_numbers(price_text)
+                        except Exception as e:
+                            print(f"Ошибка при распознании чисел из текста: {str(e)}")
+                            find_image("BACK.png")
+                            continue
 
                         if plus_number is None and price_number is None:
                             print(f"Не удалось извлечь числа из текста: {price_text}. Пропускаем этот элемент.")
