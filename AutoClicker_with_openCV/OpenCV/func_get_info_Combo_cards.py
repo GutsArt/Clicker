@@ -321,12 +321,12 @@ def main():
                 print("Не удалось найти изображение PR&Team.png, завершение работы.")
                 break
 
-            # for img_path in imgs:
-            #     process_image(img_path)
-            #
-            # if not find_image("PR&Team.png"):
-            #     print("Не удалось найти изображение PR&Team.png, завершение работы.")
-            #     break
+            for img_path in imgs:
+                process_image(img_path)
+
+            if not find_image("PR&Team.png"):
+                print("Не удалось найти изображение PR&Team.png, завершение работы.")
+                break
 
             sleep(sleep_time * 2)
 
