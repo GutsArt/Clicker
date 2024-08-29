@@ -184,12 +184,12 @@ def process_image(img_path, max_attempts=10):
                 sleep(sleep_time * 10)
                 price_text = get_price(region_money)
                 if len(price_text) < 2:
+                    find_image("BACK.png")
                     break
-                find_image("BACK.png")
 
             plus_number, price_number = extract_numbers(price_text)
 
-            if plus_number is None and price_number is None:
+            if plus_number is None or price_number is None:
                 print(f"Не удалось извлечь числа из текста: {price_text}. Пропускаем этот элемент.")
                 find_image("BACK.png")
                 break
