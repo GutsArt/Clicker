@@ -172,6 +172,9 @@ def process_image(img_path, max_attempts=10):
         result = find_image(img_path)
         if result:
             print(f"Изображение найдено в позиции: {result}")
+
+            # press_down(5)
+
             # Определяем область для поиска цены
             x1, y1 = 1770, 900
             x2, y2 = 1860, 1000
