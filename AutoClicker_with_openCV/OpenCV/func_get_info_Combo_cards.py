@@ -173,7 +173,11 @@ def process_image(img_path, max_attempts=10):
         if result:
             print(f"Изображение найдено в позиции: {result}")
 
-            # press_down(5)
+            # pyautogui.rightClick(x=1800, y=800)
+            #
+            # for _ in range(5):
+            #     pyautogui.press('down')
+            #     sleep(0.1)
 
             # Определяем область для поиска цены
             x1, y1 = 1770, 900
@@ -297,6 +301,7 @@ def smart_find(best_img, max_attempts=11, attempts=0):
     else:
         return True
 
+
 def main():
     try:
         if not find_image("MINING.png"):
@@ -395,8 +400,8 @@ def main():
                         sleep(sleep_time * 60)
 
         print(datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
-        print("Программа завершена."
-              "_"*100)
+        print("Программа завершена.\n"
+              "_" * 100)
     except Exception as e:
         print(f"Ошибка при работе с изображениями: {str(e)}")
     finally:
