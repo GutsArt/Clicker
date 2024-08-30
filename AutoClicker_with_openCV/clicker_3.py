@@ -3,8 +3,14 @@ import pyautogui
 import time
 import threading
 import random
+import pytesseract
+import cv2
+import numpy as np
 from pynput.keyboard import Listener
 from config import *
+# import pprint
+
+pytesseract.pytesseract.tesseract_cmd = r'C:\Users\artem\AppData\Local\Programs\Tesseract-OCR\tesseract.exe'
 
 image_paths = [
     'SCREENS/screen1.png',
@@ -17,9 +23,9 @@ image_paths = [
 ]
 
 
-def find_and_click_image(image_path, confidence=0.7):
+def find_and_click_image(image_path, confidence=0.8):
     try:
-        if (button := pyautogui.locateOnScreen(image_path, confidence=confidence, region=(1740, 760, 180, 320))):
+        if (button := pyautogui.locateOnScreen(image_path, confidence=confidence, region=region)):
             pyautogui.click(button, button='right')
             print(f"Клик выполнен для {image_path}.")
             pyautogui.sleep(15)
@@ -31,7 +37,7 @@ def find_and_click_image(image_path, confidence=0.7):
 
 def scroll_Hamster(image_path, scroll_times=20, confidence=0.7):
     try:
-        if (button := pyautogui.locateOnScreen(image_path, confidence=confidence, region=(1740, 760, 180, 320))):
+        if (button := pyautogui.locateOnScreen(image_path, confidence=confidence, region=region)):
             pyautogui.moveTo(button)
             for _ in range(scroll_times):
                 pyautogui.press('down')
@@ -45,21 +51,48 @@ def scroll_Hamster(image_path, scroll_times=20, confidence=0.7):
         print(f"Ошибка при обработке {image_path}: {e}")
 
 
-def click_Hamser(image_path, clicks=5, all_clicks=500, delay=0.25, confidence=0.75, region=(1740, 760, 180, 320)):
-    i = 0
-    while (i < all_clicks) and (CLICKING):
+def click_Hamser(image_path, clicks=10, delay=0.25, confidence=0.75, region=region):
+    click_all = 0
+    # while (100 < energy) and (CLICKING):
+    #     try:
+    #         if (button := pyautogui.locateOnScreen(image_path, confidence=confidence, region=region)):
+    #             # Получаем координаты центра найденной области
+    #             x, y = pyautogui.center(button)
+    #
+    #             # Добавляем случайное смещение
+    #             x += random.randint(-50, 50)
+    #             y += random.randint(-50, 50)
+    #
+    #             pyautogui.click(x=x, y=y, clicks=clicks, interval=delay, button='right')
+    #             time.sleep(delay)
+    #             click_all += clicks
+    #         else:
+    #             print(f"Изображение {image_path} не найдено на экране.")
+    #             time.sleep(15)
+    #             break
+    #     except pyautogui.PyAutoGUIException as e:
+    #         print(f"Ошибка при обработке {image_path}: {e}")
+    #         break
+    # if click_all:
+    #     current_time = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())
+    #     print(f"Current Time: {current_time} {}")
+    #     sleep_time = random.randint(1, 10)
+    #     pyautogui.sleep(sleep_time * 60)
+    while CLICKING:
+        energy = extract_digits_from_screen()
+        if energy <= 1000:
+            print(f"Энергия слишком низкая: {energy}")
+            break
+
         try:
             if (button := pyautogui.locateOnScreen(image_path, confidence=confidence, region=region)):
-                # Получаем координаты центра найденной области
                 x, y = pyautogui.center(button)
-
-                # Добавляем случайное смещение
                 x += random.randint(-50, 50)
                 y += random.randint(-50, 50)
 
                 pyautogui.click(x=x, y=y, clicks=clicks, interval=delay, button='right')
                 time.sleep(delay)
-                i += clicks
+                click_all += clicks
             else:
                 print(f"Изображение {image_path} не найдено на экране.")
                 time.sleep(15)
@@ -67,10 +100,35 @@ def click_Hamser(image_path, clicks=5, all_clicks=500, delay=0.25, confidence=0.
         except pyautogui.PyAutoGUIException as e:
             print(f"Ошибка при обработке {image_path}: {e}")
             break
-    if i == 500:
+
+    if click_all:
         current_time = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())
-        print(f"Current Time: {current_time} +7014")
-        pyautogui.sleep(10 * 60)
+        print(f"Clicks: {click_all} \n Current Time: {current_time}")
+        sleep_time = random.randint(1, 10)
+        time.sleep(sleep_time * 60)
+
+
+def extract_digits_from_screen(region=(1705, 1010, 30, 15)):
+    screenshot = pyautogui.screenshot(region=region)
+
+    screenshot = cv2.cvtColor(np.array(screenshot), cv2.COLOR_RGB2BGR)
+
+    gray_image = cv2.cvtColor(screenshot, cv2.COLOR_BGR2GRAY)
+
+    # Увеличение изображения для лучшего распознавания
+    gray_image = cv2.resize(gray_image, None, fx=2, fy=2, interpolation=cv2.INTER_CUBIC)
+
+    # Применение пороговой обработки
+    _, thresh_image = cv2.threshold(gray_image, 125, 255, cv2.THRESH_BINARY_INV)
+
+    # Применение Tesseract
+    extracted_text = pytesseract.image_to_string(thresh_image, config='--psm 6 digits')
+
+    digits = ''.join(filter(str.isdigit, extracted_text))
+    print(f"Распознанный текст: {extracted_text}")
+    print(f"Цифры: {digits}")
+
+    return int(digits) if digits.isdigit() else 0
 
 
 def on_press(key):
