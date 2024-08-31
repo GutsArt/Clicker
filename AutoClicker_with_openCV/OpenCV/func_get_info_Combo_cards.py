@@ -214,7 +214,7 @@ def process_image(img_path, max_attempts=10):
             attempts += 1
 
     if attempts == max_attempts:
-        find_image("PR&Team.png")
+        find_image(PR)
         print(f"Не удалось найти изображение {img_path} после {max_attempts} попыток.")
         sleep(sleep_time * 10)
 
@@ -307,7 +307,7 @@ def main():
         if not find_image("MINING.png"):
             print("Не удалось найти изображение MINING.png, завершение работы.")
         while CLICKING:
-            if not find_image("PR&Team.png"):
+            if not find_image(PR):
                 print("Не удалось найти изображение PR&Team.png, завершение работы.")
                 break
 
@@ -325,14 +325,14 @@ def main():
             if int(my_coins) <= 1_000_000:
                 break
 
-            if not find_image("PR&Team.png"):
+            if not find_image(PR):
                 print("Не удалось найти изображение PR&Team.png, завершение работы.")
                 break
 
             for img_path in imgs:
                 process_image(img_path)
 
-            if not find_image("PR&Team.png"):
+            if not find_image(PR):
                 print("Не удалось найти изображение PR&Team.png, завершение работы.")
                 break
 
@@ -342,7 +342,7 @@ def main():
             best_images = find_best_efficiency(my_coins)
             for best_img, efficiency, price in best_images:
                 if best_img:
-                    find_image("PR&Team.png")
+                    find_image(PR)
 
                     sleep(5)
 
