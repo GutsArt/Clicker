@@ -120,6 +120,40 @@ def get_price(region):
         return None
 
 
+def get_plus_number_price_number(img_path):
+    x1, y1 = 1770, 900
+    x2, y2 = 1860, 1000
+    region_money = (x1, y1, x2 - x1, y2 - y1)
+    price_text = get_price(region_money)
+    if len(price_text) < 2:
+        print(f"Не удалось распознать цену для {img_path}. Пропускаем этот элемент.")
+        sleep(5)
+        price_text = get_price(region_money)
+        if len(price_text) < 2:
+            create_json("PR&Team.json", img_path, "-1", "10_000_000")
+            find_image("BACK.png")
+            return False
+
+    try:
+        plus_number, price_number = extract_numbers(price_text)
+    except Exception as e:
+        print(f"Ошибка при распознании чисел из текста: {str(e)}")
+        find_image("BACK.png")
+        return False
+
+    if plus_number is None or price_number is None:
+        print(f"Не удалось извлечь числа из текста: {price_text}. Пропускаем этот элемент.")
+        find_image("BACK.png")
+        return False
+
+    if not create_json("PR&Team.json", img_path, plus_number, price_number):
+        find_image("BACK.png")
+        return False
+
+    find_image("BACK.png")
+    return True
+
+
 def extract_numbers(text):
     # Находим все числа в тексте
     numbers = re.findall(r'\d+', text)
@@ -173,40 +207,16 @@ def process_image(img_path, max_attempts=10):
         if result:
             print(f"Изображение найдено в позиции: {result}")
 
-            # pyautogui.rightClick(x=1800, y=800)
-            #
-            # for _ in range(5):
-            #     pyautogui.press('down')
-            #     sleep(0.1)
+            sleep(1)
 
-            # Определяем область для поиска цены
-            x1, y1 = 1770, 900
-            x2, y2 = 1860, 1000
-            region_money = (x1, y1, x2 - x1, y2 - y1)
-            price_text = get_price(region_money)
-            # print(f"\033[91m{price_text}\033[0m")
-            # print(f"Тип данных: {type(price_text)}")
-            if len(price_text) < 2:
-                print(f"Не удалось распознать цену для {img_path}. Пропускаем этот элемент.")
-                sleep(sleep_time * 10)
-                price_text = get_price(region_money)
-                if len(price_text) < 2:
-                    find_image("BACK.png")
-                    break
+            pyautogui.rightClick(x=1800, y=800)
 
-            plus_number, price_number = extract_numbers(price_text)
+            for _ in range(3):
+                pyautogui.press('down')
+                sleep(0.1)
 
-            if plus_number is None or price_number is None:
-                print(f"Не удалось извлечь числа из текста: {price_text}. Пропускаем этот элемент.")
-                find_image("BACK.png")
-                break
-
-            if not create_json("PR&Team.json", img_path, plus_number, price_number):
-                find_image("BACK.png")
-                break
-
-            find_image("BACK.png")
-            break  # Выходим из цикла, если изображение найдено
+            get_plus_number_price_number(img_path)
+            break
         else:
             print(f"Изображение не найдено, попытка {attempts + 1}/{max_attempts}. Прокручиваем вниз...")
             press_down(5)
@@ -360,35 +370,9 @@ def main():
                         print(f"Не удалось найти изображение |{best_img}|, пробуем следующее.")
                         continue
                     else:
-                        x1, y1 = 1770, 900
-                        x2, y2 = 1860, 1000
-                        region_money = (x1, y1, x2 - x1, y2 - y1)
-                        price_text = get_price(region_money)
-                        if len(price_text) < 2:
-                            print(f"Не удалось распознать цену для {best_img}. Пропускаем этот элемент.")
-                            sleep(sleep_time * 10)
-                            price_text = get_price(region_money)
-                            if len(price_text) < 2:
-                                continue
-                            find_image("BACK.png")
-
-                        try:
-                            plus_number, price_number = extract_numbers(price_text)
-                        except Exception as e:
-                            print(f"Ошибка при распознании чисел из текста: {str(e)}")
-                            find_image("BACK.png")
+                        if not get_plus_number_price_number(best_img):
+                            print(f"Не удалось найти изображение |{best_img}| для получения суммы, пробуем следующее.")
                             continue
-
-                        if plus_number is None and price_number is None:
-                            print(f"Не удалось извлечь числа из текста: {price_text}. Пропускаем этот элемент.")
-                            find_image("BACK.png")
-                            continue
-
-                        if not create_json("PR&Team.json", best_img, plus_number, price_number):
-                            find_image("BACK.png")
-                            continue
-
-                    find_image("BACK.png")
 
                     remaining_money = my_coins - price
                     if remaining_money <= 1_000_000:
