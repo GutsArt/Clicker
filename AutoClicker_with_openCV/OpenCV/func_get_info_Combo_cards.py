@@ -229,6 +229,37 @@ def process_image(img_path, max_attempts=10):
         sleep(sleep_time * 10)
 
 
+def check_mining_category(category):
+    if not find_image(category):
+        print(f"Не удалось найти изображение {category}, завершение работы.")
+        return False
+
+    press_up(50)
+
+    sleep(1)
+
+    x, y = 1770, 895
+    x1, y1 = 1875, 920
+    my_coins = get_price((x, y, x1 - x, y1 - y))
+    print(f"Текущий баланс монет: {my_coins}")
+    if not my_coins:
+        return False
+
+    if int(my_coins) <= 1_000_000:
+        return False
+
+    if not find_image(category):
+        print(f"Не удалось найти изображение {category}, завершение работы.")
+        return False
+
+    for img_path in imgs:
+        process_image(img_path)
+
+    if not find_image(category):
+        print(f"Не удалось найти изображение {category}, завершение работы.")
+        return False
+    return my_coins
+
 # def find_best_efficiency(my_coins):
 #     try:
 #         # Преобразуем доступные монеты в целое число, если они не в формате числа
@@ -317,34 +348,7 @@ def main():
         if not find_image("MINING.png"):
             print("Не удалось найти изображение MINING.png, завершение работы.")
         while CLICKING:
-            if not find_image(PR):
-                print("Не удалось найти изображение PR&Team.png, завершение работы.")
-                break
-
-            press_up(50)
-
-            sleep(1)
-
-            x, y = 1770, 895
-            x1, y1 = 1875, 920
-            my_coins = get_price((x, y, x1 - x, y1 - y))
-            print(f"Текущий баланс монет: {my_coins}")
-            if not my_coins:
-                break
-
-            if int(my_coins) <= 1_000_000:
-                break
-
-            if not find_image(PR):
-                print("Не удалось найти изображение PR&Team.png, завершение работы.")
-                break
-
-            for img_path in imgs:
-                process_image(img_path)
-
-            if not find_image(PR):
-                print("Не удалось найти изображение PR&Team.png, завершение работы.")
-                break
+            my_coins = check_mining_category(PR)
 
             sleep(sleep_time * 2)
 
