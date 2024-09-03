@@ -200,7 +200,7 @@ def sleep(time):
     pyautogui.sleep(time)
 
 
-def process_image(img_path, max_attempts=10):
+def process_image(img_path,category, max_attempts=10):
     attempts = 0
     while attempts < max_attempts:
         result = find_image(img_path)
@@ -224,12 +224,12 @@ def process_image(img_path, max_attempts=10):
             attempts += 1
 
     if attempts == max_attempts:
-        find_image(categories[0])
+        find_image(category)
         print(f"Не удалось найти изображение {img_path} после {max_attempts} попыток.")
         sleep(sleep_time * 10)
 
 
-def check_mining_category(category):
+def check_mining_category(category, imgs):
     if not find_image(category):
         print(f"Не удалось найти изображение {category}, завершение работы.")
         return False
@@ -253,7 +253,7 @@ def check_mining_category(category):
         return False
 
     for img_path in imgs:
-        process_image(img_path)
+        process_image(img_path, category)
 
     if not find_image(category):
         print(f"Не удалось найти изображение {category}, завершение работы.")
@@ -348,7 +348,11 @@ def main():
         if not find_image("MINING.png"):
             print("Не удалось найти изображение MINING.png, завершение работы.")
         while CLICKING:
-            my_coins = check_mining_category(categories[0])
+            check_mining_category(categories[0], imgs)
+            check_mining_category(categories[1], imgs_Markets)
+            check_mining_category(categories[2], imgs_Legal)
+            check_mining_category(categories[3], imgs_Web3)
+            my_coins = check_mining_category(categories[4], imgs_Specials)
 
             sleep(sleep_time * 2)
 
