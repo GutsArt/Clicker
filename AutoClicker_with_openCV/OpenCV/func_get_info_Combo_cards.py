@@ -360,6 +360,7 @@ def main():
             best_images = find_best_efficiency(my_coins)
             for best_img, efficiency, price in best_images:
                 if best_img:
+                    # categories from best_img
                     find_image(categories[0])
 
                     sleep(5)
