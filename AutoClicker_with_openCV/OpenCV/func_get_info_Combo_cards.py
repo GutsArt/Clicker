@@ -120,7 +120,7 @@ def get_price(region):
         return None
 
 
-def get_plus_number_price_number(img_path):
+def get_plus_number_price_number(img_path, category):
     x1, y1 = 1770, 900
     x2, y2 = 1860, 1000
     region_money = (x1, y1, x2 - x1, y2 - y1)
@@ -130,7 +130,7 @@ def get_plus_number_price_number(img_path):
         sleep(5)
         price_text = get_price(region_money)
         if len(price_text) < 2:
-            create_json("PR&Team.json", img_path, "-1", "10_000_000")
+            create_json(f"{category}.json", img_path, "-1", "10_000_000")
             find_image("BACK.png")
             return False
 
@@ -146,7 +146,7 @@ def get_plus_number_price_number(img_path):
         find_image("BACK.png")
         return False
 
-    if not create_json("PR&Team.json", img_path, plus_number, price_number):
+    if not create_json(f"{category}.json", img_path, plus_number, price_number):
         find_image("BACK.png")
         return False
 
@@ -183,10 +183,10 @@ def create_json(json_filename, img_path, plus_number, price_number):
         data = {}
 
     # Обновляем данные или создаем новую запись
-    if "PR&Team" not in data:
-        data["PR&Team"] = {}
+    if f"{json_filename}" not in data:
+        data[f"{json_filename}"] = {}
 
-    data["PR&Team"][img_path] = {
+    data[f"{json_filename}"][img_path] = {
         "profit": f"+{plus_number}" if plus_number else None,
         "price": f"{price_number}" if price_number else None,
         "efficiency": f"{(int(plus_number) * 100) / int(price_number):.5f}" if price_number != 0 else None
@@ -200,7 +200,7 @@ def sleep(time):
     pyautogui.sleep(time)
 
 
-def process_image(img_path,category, max_attempts=10):
+def process_image(img_path, category, max_attempts=20):
     attempts = 0
     while attempts < max_attempts:
         result = find_image(img_path)
@@ -211,22 +211,24 @@ def process_image(img_path,category, max_attempts=10):
 
             pyautogui.rightClick(x=1800, y=800)
 
-            for _ in range(3):
+            sleep(1)
+
+            for _ in range(3): # 5
                 pyautogui.press('down')
                 sleep(0.1)
 
-            get_plus_number_price_number(img_path)
+            get_plus_number_price_number(img_path, category)
             break
         else:
             print(f"Изображение не найдено, попытка {attempts + 1}/{max_attempts}. Прокручиваем вниз...")
-            press_down(5)
+            press_down(3) # 5
             sleep(sleep_time)
             attempts += 1
 
     if attempts == max_attempts:
         find_image(category)
         print(f"Не удалось найти изображение {img_path} после {max_attempts} попыток.")
-        sleep(sleep_time * 10)
+
 
 
 def check_mining_category(category, imgs):
@@ -259,6 +261,7 @@ def check_mining_category(category, imgs):
         print(f"Не удалось найти изображение {category}, завершение работы.")
         return False
     return my_coins
+
 
 # def find_best_efficiency(my_coins):
 #     try:
@@ -330,17 +333,31 @@ def find_best_efficiency(my_coins, top_n=10):
         return None
 
 
-def smart_find(best_img, max_attempts=11, attempts=0):
+def smart_find(best_img, max_attempts=20, attempts=0):
     while attempts < max_attempts:
         if find_image(best_img):
             break
         press_down(5)
         attempts += 1
     if attempts == max_attempts:
-        print("Изображение не найдено после 11 попыток")
+        print(f"Изображение не найдено после {max_attempts} попыток")
         return None
     else:
         return True
+
+
+def transform_path(file_path):
+    # Разделяем путь по разделителю папок
+    parts = file_path.split('\\')
+
+    # Убираем имя файла и оставляем только путь до папки
+    folder_name = parts[-2]
+    print(folder_name)
+
+    # Формируем новый путь, добавляя `.png` к имени папки
+    new_path = '\\'.join(parts[:-2]) + '\\' + folder_name + '.png'
+
+    return new_path
 
 
 def main():
@@ -354,14 +371,15 @@ def main():
             check_mining_category(categories[3], imgs_Web3)
             my_coins = check_mining_category(categories[4], imgs_Specials)
 
-            sleep(sleep_time * 2)
+            sleep(2)
 
             # best_img, remaining_money = find_best_efficiency(my_coins)
             best_images = find_best_efficiency(my_coins)
             for best_img, efficiency, price in best_images:
                 if best_img:
                     # categories from best_img
-                    find_image(categories[0])
+                    category = transform_path(best_img)
+                    find_image(category)
 
                     sleep(5)
 
@@ -375,11 +393,12 @@ def main():
 
                     sleep(5)
 
-                    if not smart_find(best_img):
+                    if not find_image(best_img):
                         print(f"Не удалось найти изображение |{best_img}|, пробуем следующее.")
+                        create_json(f"{category}.json", best_img, "-1", "10_000_000")
                         continue
                     else:
-                        if not get_plus_number_price_number(best_img):
+                        if not get_plus_number_price_number(best_img, category):
                             print(f"Не удалось найти изображение |{best_img}| для получения суммы, пробуем следующее.")
                             continue
 
