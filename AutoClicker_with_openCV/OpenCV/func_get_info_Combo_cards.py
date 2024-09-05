@@ -130,7 +130,7 @@ def get_plus_number_price_number(img_path, category):
         sleep(5)
         price_text = get_price(region_money)
         if len(price_text) < 2:
-            create_json(f"{category}.json", img_path, "-1", "10_000_000")
+            create_json(category, img_path, "-1", "10_000_000")
             find_image("BACK.png")
             return False
 
@@ -146,7 +146,7 @@ def get_plus_number_price_number(img_path, category):
         find_image("BACK.png")
         return False
 
-    if not create_json(f"{category}.json", img_path, plus_number, price_number):
+    if not create_json(category, img_path, plus_number, price_number):
         find_image("BACK.png")
         return False
 
@@ -176,8 +176,9 @@ def extract_numbers(text):
 
 
 def create_json(json_filename, img_path, plus_number, price_number):
+    print(json_filename)
     try:
-        with open(json_filename, 'r') as file:
+        with open("All.json", 'r') as file:
             data = json.load(file)
     except (FileNotFoundError, json.JSONDecodeError):
         data = {}
@@ -192,7 +193,7 @@ def create_json(json_filename, img_path, plus_number, price_number):
         "efficiency": f"{(int(plus_number) * 100) / int(price_number):.5f}" if price_number != 0 else None
     }
 
-    with open(json_filename, 'w') as file:
+    with open("All.json", 'w') as file:
         json.dump(data, file, indent=2)
 
 
@@ -236,19 +237,19 @@ def check_mining_category(category, imgs):
         print(f"Не удалось найти изображение {category}, завершение работы.")
         return False
 
-    press_up(50)
-
-    sleep(1)
-
-    x, y = 1770, 895
-    x1, y1 = 1875, 920
-    my_coins = get_price((x, y, x1 - x, y1 - y))
-    print(f"Текущий баланс монет: {my_coins}")
-    if not my_coins:
-        return False
-
-    if int(my_coins) <= 1_000_000:
-        return False
+    # press_up(50)
+    #
+    # sleep(1)
+    #
+    # x, y = 1770, 895
+    # x1, y1 = 1875, 920
+    # my_coins = get_price((x, y, x1 - x, y1 - y))
+    # print(f"Текущий баланс монет: {my_coins}")
+    # if not my_coins:
+    #     return False
+    #
+    # if int(my_coins) <= 1_000_000:
+    #     return False
 
     if not find_image(category):
         print(f"Не удалось найти изображение {category}, завершение работы.")
@@ -260,7 +261,7 @@ def check_mining_category(category, imgs):
     if not find_image(category):
         print(f"Не удалось найти изображение {category}, завершение работы.")
         return False
-    return my_coins
+    return 10_000_000 #(my_coins = 10_000_000)
 
 
 # def find_best_efficiency(my_coins):
@@ -305,21 +306,23 @@ def find_best_efficiency(my_coins, top_n=10):
         # Преобразуем доступные монеты в целое число, если они не в формате числа
         my_coins = int(my_coins)
 
-        with open("PR&Team.json", 'r') as file:
+        with open("All.json", 'r') as file:
             data = json.load(file)
             efficiencies = []
 
-            for img_path, values in data["PR&Team"].items():
-                try:
-                    efficiency = float(values["efficiency"])
-                    price = int(values["price"])  # Преобразуем цену в целое число
+            for category in categories:
+                if category in data:
+                    for img_path, values in data[category].items():
+                        try:
+                            efficiency = float(values["efficiency"])
+                            price = int(values["price"])  # Преобразуем цену в целое число
 
-                    if price <= my_coins:
-                        efficiencies.append((img_path, efficiency, price))
-                except ValueError:
-                    print(f"Невозможно преобразовать цену в целое число для {img_path}")
+                            if price <= my_coins:
+                                efficiencies.append((img_path, efficiency, price))
+                        except ValueError:
+                            print(f"Невозможно преобразовать цену в целое число для {img_path}")
 
-            # Сортируем по эффективности в порядке убывания и берем топ N
+                # Сортируем по эффективности в порядке убывания и берем топ N
             top_efficiencies = sorted(efficiencies, key=lambda x: x[1], reverse=True)[:top_n]
 
             for img_path, efficiency, price in top_efficiencies:
@@ -395,7 +398,7 @@ def main():
 
                     if not find_image(best_img):
                         print(f"Не удалось найти изображение |{best_img}|, пробуем следующее.")
-                        create_json(f"{category}.json", best_img, "-1", "10_000_000")
+                        create_json(category, best_img, "-1", "10_000_000")
                         continue
                     else:
                         if not get_plus_number_price_number(best_img, category):
