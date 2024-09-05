@@ -175,6 +175,24 @@ def extract_numbers(text):
     return plus_number, remaining_number
 
 
+def check_coins(category):
+    if not find_image(category):
+        print(f"Не удалось найти изображение {category}, завершение работы.")
+        return False
+
+    press_up(50)
+
+    sleep(1)
+
+    x, y = 1770, 895
+    x1, y1 = 1875, 920
+    my_coins = get_price((x, y, x1 - x, y1 - y))
+    print(f"Текущий баланс монет: {my_coins}")
+    if not my_coins:
+        return False
+    return my_coins
+
+
 def create_json(json_filename, img_path, plus_number, price_number):
     print(json_filename)
     try:
@@ -214,7 +232,7 @@ def process_image(img_path, category, max_attempts=20):
 
             sleep(1)
 
-            for _ in range(3): # 5
+            for _ in range(3):  # 5
                 pyautogui.press('down')
                 sleep(0.1)
 
@@ -222,7 +240,7 @@ def process_image(img_path, category, max_attempts=20):
             break
         else:
             print(f"Изображение не найдено, попытка {attempts + 1}/{max_attempts}. Прокручиваем вниз...")
-            press_down(3) # 5
+            press_down(3)  # 5
             sleep(sleep_time)
             attempts += 1
 
@@ -231,26 +249,7 @@ def process_image(img_path, category, max_attempts=20):
         print(f"Не удалось найти изображение {img_path} после {max_attempts} попыток.")
 
 
-
 def check_mining_category(category, imgs):
-    if not find_image(category):
-        print(f"Не удалось найти изображение {category}, завершение работы.")
-        return False
-
-    # press_up(50)
-    #
-    # sleep(1)
-    #
-    # x, y = 1770, 895
-    # x1, y1 = 1875, 920
-    # my_coins = get_price((x, y, x1 - x, y1 - y))
-    # print(f"Текущий баланс монет: {my_coins}")
-    # if not my_coins:
-    #     return False
-    #
-    # if int(my_coins) <= 1_000_000:
-    #     return False
-
     if not find_image(category):
         print(f"Не удалось найти изображение {category}, завершение работы.")
         return False
@@ -261,7 +260,7 @@ def check_mining_category(category, imgs):
     if not find_image(category):
         print(f"Не удалось найти изображение {category}, завершение работы.")
         return False
-    return 10_000_000 #(my_coins = 10_000_000)
+    return True
 
 
 # def find_best_efficiency(my_coins):
@@ -368,6 +367,11 @@ def main():
         if not find_image("MINING.png"):
             print("Не удалось найти изображение MINING.png, завершение работы.")
         while CLICKING:
+            my_coins = check_coins(categories[0])
+
+            if int(my_coins) <= 1_000_000:
+                return False
+
             check_mining_category(categories[0], imgs)
             check_mining_category(categories[1], imgs_Markets)
             check_mining_category(categories[2], imgs_Legal)
