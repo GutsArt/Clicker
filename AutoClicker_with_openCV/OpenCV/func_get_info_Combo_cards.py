@@ -120,11 +120,11 @@ def get_price(region):
         return None
 
 
-def get_plus_number_price_number(img_path, category):
+def get_plus_number_price_number(img_path, category): # переделать try: except:             create_json(category, img_path, "-1", "10_000_000")
     x1, y1 = 1770, 900
     x2, y2 = 1860, 1000
     region_money = (x1, y1, x2 - x1, y2 - y1)
-    price_text = get_price(region_money)
+    price_text = get_price(region_money) # + K = 1000
     if len(price_text) < 2:
         print(f"Не удалось распознать цену для {img_path}. Пропускаем этот элемент.")
         sleep(5)
@@ -136,13 +136,16 @@ def get_plus_number_price_number(img_path, category):
 
     try:
         plus_number, price_number = extract_numbers(price_text)
+        print(plus_number, price_number)
     except Exception as e:
         print(f"Ошибка при распознании чисел из текста: {str(e)}")
+        create_json(category, img_path, "-1", "10_000_000")
         find_image("BACK.png")
         return False
 
     if plus_number is None or price_number is None:
         print(f"Не удалось извлечь числа из текста: {price_text}. Пропускаем этот элемент.")
+        create_json(category, img_path, "-1", "10_000_000")
         find_image("BACK.png")
         return False
 
@@ -219,7 +222,7 @@ def sleep(time):
     pyautogui.sleep(time)
 
 
-def process_image(img_path, category, max_attempts=20):
+def process_image(img_path, category, n_clicks, max_attempts=30):
     attempts = 0
     while attempts < max_attempts:
         result = find_image(img_path)
@@ -232,7 +235,7 @@ def process_image(img_path, category, max_attempts=20):
 
             sleep(1)
 
-            for _ in range(3):  # 5
+            for _ in range(n_clicks):
                 pyautogui.press('down')
                 sleep(0.1)
 
@@ -240,7 +243,7 @@ def process_image(img_path, category, max_attempts=20):
             break
         else:
             print(f"Изображение не найдено, попытка {attempts + 1}/{max_attempts}. Прокручиваем вниз...")
-            press_down(3)  # 5
+            press_down(n_clicks)
             sleep(sleep_time)
             attempts += 1
 
@@ -249,13 +252,13 @@ def process_image(img_path, category, max_attempts=20):
         print(f"Не удалось найти изображение {img_path} после {max_attempts} попыток.")
 
 
-def check_mining_category(category, imgs):
+def check_mining_category(category, imgs, n_clicks):
     if not find_image(category):
         print(f"Не удалось найти изображение {category}, завершение работы.")
         return False
 
     for img_path in imgs:
-        process_image(img_path, category)
+        process_image(img_path, category, n_clicks)
 
     if not find_image(category):
         print(f"Не удалось найти изображение {category}, завершение работы.")
@@ -371,12 +374,13 @@ def main():
 
             if int(my_coins) <= 1_000_000:
                 return False
+            # my_coins = 10_000_000
 
-            check_mining_category(categories[0], imgs)
-            check_mining_category(categories[1], imgs_Markets)
-            check_mining_category(categories[2], imgs_Legal)
-            check_mining_category(categories[3], imgs_Web3)
-            my_coins = check_mining_category(categories[4], imgs_Specials)
+            check_mining_category(categories[0], imgs, 3) # 20
+            check_mining_category(categories[1], imgs_Markets, 2) # 20
+            check_mining_category(categories[2], imgs_Legal, 2) # 15
+            check_mining_category(categories[3], imgs_Web3, 2) # 10
+            check_mining_category(categories[4], imgs_Specials, 5) # 30
 
             sleep(2)
 
