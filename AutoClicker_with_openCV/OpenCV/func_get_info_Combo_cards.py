@@ -222,7 +222,7 @@ def sleep(time):
     pyautogui.sleep(time)
 
 
-def process_image(img_path, category, n_clicks, max_attempts=30):
+def process_image(img_path, category, n_clicks, max_attempts):
     attempts = 0
     while attempts < max_attempts:
         result = find_image(img_path)
@@ -252,13 +252,13 @@ def process_image(img_path, category, n_clicks, max_attempts=30):
         print(f"Не удалось найти изображение {img_path} после {max_attempts} попыток.")
 
 
-def check_mining_category(category, imgs, n_clicks):
+def check_mining_category(category, imgs, n_clicks, max_attempts):
     if not find_image(category):
         print(f"Не удалось найти изображение {category}, завершение работы.")
         return False
 
     for img_path in imgs:
-        process_image(img_path, category, n_clicks)
+        process_image(img_path, category, n_clicks, max_attempts)
 
     if not find_image(category):
         print(f"Не удалось найти изображение {category}, завершение работы.")
@@ -376,11 +376,11 @@ def main():
                 return False
             # my_coins = 10_000_000
 
-            check_mining_category(categories[0], imgs, 3) # 20
-            check_mining_category(categories[1], imgs_Markets, 2) # 20
-            check_mining_category(categories[2], imgs_Legal, 2) # 15
-            check_mining_category(categories[3], imgs_Web3, 2) # 10
-            check_mining_category(categories[4], imgs_Specials, 5) # 30
+            check_mining_category(categories[0], imgs, 3, 20) # 20
+            check_mining_category(categories[1], imgs_Markets, 2, 20) # 20
+            check_mining_category(categories[2], imgs_Legal, 2, 15) # 15
+            check_mining_category(categories[3], imgs_Web3, 2, 15) # 10
+            check_mining_category(categories[4], imgs_Specials, 6, 30) # 30
 
             sleep(2)
 
