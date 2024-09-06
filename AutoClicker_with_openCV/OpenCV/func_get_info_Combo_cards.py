@@ -149,11 +149,9 @@ def get_plus_number_price_number(img_path, category): # переделать try
         find_image("BACK.png")
         return False
 
-    if not create_json(category, img_path, plus_number, price_number):
-        find_image("BACK.png")
-        return False
-
-    find_image("BACK.png")
+    create_json(category, img_path, plus_number, price_number)
+    if not find_image("BACK.png"):
+        pyautogui.rightClick(x=1915, y=740)
     return True
 
 
