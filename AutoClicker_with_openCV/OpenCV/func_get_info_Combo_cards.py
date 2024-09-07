@@ -91,7 +91,7 @@ def get_price(region):
         _, thresh = cv2.threshold(img_filtered, 160, 255, cv2.THRESH_BINARY_INV)
 
         # Используем Tesseract для распознавания текста
-        config = '--psm 6 -c tessedit_char_whitelist=0123456789+'
+        config = '--psm 6 -c tessedit_char_whitelist=0123456789+,K'
         text = pytesseract.image_to_string(thresh, config=config)
 
         # # Отображаем исходное изображение и результат
@@ -120,11 +120,12 @@ def get_price(region):
         return None
 
 
-def get_plus_number_price_number(img_path, category): # переделать try: except:             create_json(category, img_path, "-1", "10_000_000")
+def get_plus_number_price_number(img_path,
+                                 category):  # переделать try: except:             create_json(category, img_path, "-1", "10_000_000")
     x1, y1 = 1770, 900
     x2, y2 = 1860, 1000
     region_money = (x1, y1, x2 - x1, y2 - y1)
-    price_text = get_price(region_money) # + K = 1000
+    price_text = get_price(region_money)  # + K = 1000
     if len(price_text) < 2:
         print(f"Не удалось распознать цену для {img_path}. Пропускаем этот элемент.")
         sleep(5)
@@ -135,7 +136,7 @@ def get_plus_number_price_number(img_path, category): # переделать try
             return False
 
     try:
-        plus_number, price_number = extract_numbers(price_text)
+        plus_number, price_number = extract_numbers(process_text(price_text))
         print(plus_number, price_number)
     except Exception as e:
         print(f"Ошибка при распознании чисел из текста: {str(e)}")
@@ -153,6 +154,38 @@ def get_plus_number_price_number(img_path, category): # переделать try
     if not find_image("BACK.png"):
         pyautogui.rightClick(x=1915, y=740)
     return True
+
+
+def process_text(text):
+    # Разбиваем текст на строки
+    lines = text.splitlines()
+    processed_lines = []
+
+    for line in lines:
+        line = line.strip()  # - spaces
+        prefix = ""
+        if line.startswith('+'):
+            prefix = "+"
+            line = line[1:]  # - '+'
+
+        line = line.replace(',', '.')
+
+        if 'K' in line:
+            line = line.replace('K', '')
+            try:
+                line = str(int(float(line) * 1000))
+            except ValueError:
+                print(f"Ошибка при преобразовании строки: {line}")
+        # elif 'M' in line:
+
+        processed_lines.append(prefix + line)
+
+    print("=" * 50)
+    print("\n".join(processed_lines))
+    print("=" * 50)
+
+    # Возвращаем результат как строки
+    return "\n".join(processed_lines)
 
 
 def extract_numbers(text):
@@ -375,10 +408,10 @@ def main():
             # my_coins = 10_000_000
 
             check_mining_category(categories[0], imgs, 3, 20) # 20
-            check_mining_category(categories[1], imgs_Markets, 2, 20) # 20
-            check_mining_category(categories[2], imgs_Legal, 2, 15) # 15
-            check_mining_category(categories[3], imgs_Web3, 2, 15) # 10
-            check_mining_category(categories[4], imgs_Specials, 6, 30) # 30
+            check_mining_category(categories[1], imgs_Markets, 2, 20)  # 20
+            check_mining_category(categories[2], imgs_Legal, 2, 15)  # 15
+            check_mining_category(categories[3], imgs_Web3, 2, 15)  # 10
+            check_mining_category(categories[4], imgs_Specials, 6, 30)  # 30
 
             sleep(2)
 
