@@ -91,7 +91,7 @@ def get_price(region):
         _, thresh = cv2.threshold(img_filtered, 160, 255, cv2.THRESH_BINARY_INV)
 
         # Используем Tesseract для распознавания текста
-        config = '--psm 6 -c tessedit_char_whitelist=0123456789+,K'
+        config = '--psm 6 -c tessedit_char_whitelist=0123456789+,KM'
         text = pytesseract.image_to_string(thresh, config=config)
 
         # # Отображаем исходное изображение и результат
@@ -176,8 +176,12 @@ def process_text(text):
                 line = str(int(float(line) * 1000))
             except ValueError:
                 print(f"Ошибка при преобразовании строки: {line}")
-        # elif 'M' in line:
-
+        elif 'M' in line:
+            line = line.replace('M', '')
+            try:
+                line = str(int(float(line) * 1000000))
+            except ValueError:
+                print(f"Ошибка при преобразовании строки: {line}")
         processed_lines.append(prefix + line)
 
     print("=" * 50)
