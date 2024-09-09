@@ -91,7 +91,8 @@ def get_price(region):
         _, thresh = cv2.threshold(img_filtered, 160, 255, cv2.THRESH_BINARY_INV)
 
         # Используем Tesseract для распознавания текста
-        config = '--psm 6 -c tessedit_char_whitelist=0123456789+,KM'
+        config = '--psm 6 -c tessedit_char_whitelist=0123456789+,K'
+        # config = '--psm 6 -c tessedit_char_whitelist=0123456789+,KM'
         text = pytesseract.image_to_string(thresh, config=config)
 
         # # Отображаем исходное изображение и результат
@@ -120,8 +121,7 @@ def get_price(region):
         return None
 
 
-def get_plus_number_price_number(img_path,
-                                 category):  # переделать try: except:             create_json(category, img_path, "-1", "10_000_000")
+def get_plus_number_price_number(img_path, category):  # переделать try: except:             create_json(category, img_path, "-1", "10_000_000")
     x1, y1 = 1770, 900
     x2, y2 = 1860, 1000
     region_money = (x1, y1, x2 - x1, y2 - y1)
@@ -176,12 +176,12 @@ def process_text(text):
                 line = str(int(float(line) * 1000))
             except ValueError:
                 print(f"Ошибка при преобразовании строки: {line}")
-        elif 'M' in line:
-            line = line.replace('M', '')
-            try:
-                line = str(int(float(line) * 1000000))
-            except ValueError:
-                print(f"Ошибка при преобразовании строки: {line}")
+        # elif 'M' in line:
+        #     line = line.replace('M', '')
+        #     try:
+        #         line = str(int(float(line) * 1000000))
+        #     except ValueError:
+        #         print(f"Ошибка при преобразовании строки: {line}")
         processed_lines.append(prefix + line)
 
     print("=" * 50)
@@ -338,7 +338,7 @@ def check_mining_category(category, imgs, n_clicks, max_attempts):
 #         return None, my_coins
 
 
-def find_best_efficiency(my_coins, top_n=10):
+def find_best_efficiency(my_coins, top_n=3):
     try:
         # Преобразуем доступные монеты в целое число, если они не в формате числа
         my_coins = int(my_coins)
@@ -373,7 +373,7 @@ def find_best_efficiency(my_coins, top_n=10):
         return None
 
 
-def smart_find(best_img, max_attempts=20, attempts=0):
+def smart_find(best_img, max_attempts=30, attempts=0):
     while attempts < max_attempts:
         if find_image(best_img):
             break
@@ -433,20 +433,27 @@ def main():
                         print(f"Не удалось найти изображение |{best_img}|, пробуем следующее.")
                         continue  # Переходим к следующему изображению
 
+                    sleep(3)
+
                     if not find_image("GET.png"):
                         print("Не удалось найти изображение GET.png, завершение работы.")
                         continue
 
                     sleep(5)
 
-                    if not find_image(best_img):
+                    # if not find_image(best_img):
+                    #     print(f"Не удалось найти изображение |{best_img}|, пробуем следующее.")
+                    #     create_json(category, best_img, "-1", "10_000_000")
+                    #     continue
+                    # else:
+                    #     if not get_plus_number_price_number(best_img, category):
+                    #         print(f"Не удалось найти изображение |{best_img}| для получения суммы, пробуем следующее.")
+                    #         continue
+
+                    if not process_image(best_img, category, 6, 3):
                         print(f"Не удалось найти изображение |{best_img}|, пробуем следующее.")
                         create_json(category, best_img, "-1", "10_000_000")
                         continue
-                    else:
-                        if not get_plus_number_price_number(best_img, category):
-                            print(f"Не удалось найти изображение |{best_img}| для получения суммы, пробуем следующее.")
-                            continue
 
                     remaining_money = my_coins - price
                     if remaining_money <= 1_000_000:
@@ -456,6 +463,7 @@ def main():
                         print(f"Time: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')} Money: {remaining_money}"
                               f"{remaining_money} <= {1_000_000}")
                         sleep(sleep_time * 60)
+                    sleep(60)
 
         print(datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
         print("Программа завершена.\n"
