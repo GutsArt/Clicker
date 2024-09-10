@@ -386,6 +386,34 @@ def smart_find(best_img, max_attempts=30, attempts=0):
         return True
 
 
+def current_find(img):
+    category = transform_path(img)
+    find_image(category)
+
+    smart_find(img)
+
+    sleep(5)
+
+    if not smart_find(img):
+        print(f"Не удалось найти изображение |{img}|, пробуем следующее.")
+        return False  # Переходим к следующему изображению
+
+    sleep(3)
+
+    if not find_image("GET.png"):
+        print("Не удалось найти изображение GET.png, завершение работы.")
+        return False
+
+    sleep(5)
+
+    if not process_image(img, category, 6, 3):
+        print(f"Не удалось найти изображение |{img}|, пробуем следующее.")
+        create_json(category, img, "-1", "10_000_000")
+        return False
+
+    return True
+
+
 def transform_path(file_path):
     # Разделяем путь по разделителю папок
     parts = file_path.split('\\')
@@ -411,7 +439,7 @@ def main():
                 return False
             # my_coins = 10_000_000
 
-            check_mining_category(categories[0], imgs, 3, 20) # 20
+            check_mining_category(categories[0], imgs, 3, 20)  # 20
             check_mining_category(categories[1], imgs_Markets, 2, 20)  # 20
             check_mining_category(categories[2], imgs_Legal, 2, 15)  # 15
             check_mining_category(categories[3], imgs_Web3, 2, 15)  # 10
@@ -423,38 +451,8 @@ def main():
             best_images = find_best_efficiency(my_coins)
             for best_img, efficiency, price in best_images:
                 if best_img:
-                    # categories from best_img
-                    category = transform_path(best_img)
-                    find_image(category)
-
-                    sleep(5)
-
-                    if not smart_find(best_img):
-                        print(f"Не удалось найти изображение |{best_img}|, пробуем следующее.")
-                        continue  # Переходим к следующему изображению
-
-                    sleep(3)
-
-                    if not find_image("GET.png"):
-                        print("Не удалось найти изображение GET.png, завершение работы.")
-                        continue
-
-                    sleep(5)
-
-                    # if not find_image(best_img):
-                    #     print(f"Не удалось найти изображение |{best_img}|, пробуем следующее.")
-                    #     create_json(category, best_img, "-1", "10_000_000")
-                    #     continue
-                    # else:
-                    #     if not get_plus_number_price_number(best_img, category):
-                    #         print(f"Не удалось найти изображение |{best_img}| для получения суммы, пробуем следующее.")
-                    #         continue
-
-                    if not process_image(best_img, category, 6, 3):
-                        print(f"Не удалось найти изображение |{best_img}|, пробуем следующее.")
-                        create_json(category, best_img, "-1", "10_000_000")
-                        continue
-
+                    current_find(best_img)
+                    '''
                     remaining_money = my_coins - price
                     if remaining_money <= 1_000_000:
                         print("Достаточно денег для завершения работы.")
@@ -464,10 +462,11 @@ def main():
                               f"{remaining_money} <= {1_000_000}")
                         sleep(sleep_time * 60)
                     sleep(60)
+                    '''
 
         print(datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
-        print("Программа завершена.\n"
-              "_" * 100)
+        print("Программа завершена.")
+        print("_" * 100)
     except Exception as e:
         print(f"Ошибка при работе с изображениями: {str(e)}")
     finally:
