@@ -452,7 +452,7 @@ def main():
             for best_img, efficiency, price in best_images:
                 if best_img:
                     current_find(best_img)
-                    '''
+
                     remaining_money = my_coins - price
                     if remaining_money <= 1_000_000:
                         print("Достаточно денег для завершения работы.")
@@ -461,8 +461,6 @@ def main():
                         print(f"Time: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')} Money: {remaining_money}"
                               f"{remaining_money} <= {1_000_000}")
                         sleep(sleep_time * 60)
-                    sleep(60)
-                    '''
 
         print(datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
         print("Программа завершена.")
