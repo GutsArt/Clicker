@@ -121,7 +121,7 @@ def get_price(region):
         return None
 
 
-def get_plus_number_price_number(img_path, category):  # переделать try: except:             create_json(category, img_path, "-1", "10_000_000")
+def get_plus_number_price_number(img_path, category):  # Error:create_json(category, img_path, "-1", "10_000_000")
     x1, y1 = 1770, 900
     x2, y2 = 1860, 1000
     region_money = (x1, y1, x2 - x1, y2 - y1)
@@ -390,8 +390,6 @@ def current_find(img):
     category = transform_path(img)
     find_image(category)
 
-    smart_find(img)
-
     sleep(5)
 
     if not smart_find(img):
@@ -461,6 +459,15 @@ def main():
                         print(f"Time: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')} Money: {remaining_money}"
                               f"{remaining_money} <= {1_000_000}")
                         sleep(sleep_time * 60)
+            '''
+            imgs = [
+                    r"SCREENS\PR&Team\Cointelegraph.png",
+                    r"SCREENS\Markets\Margin trading x50.png",
+                    r"SCREENS\Specials\HamsterStore launch.png",
+            ]
+            for img in imgs:
+                current_find(img)
+            '''
 
         print(datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
         print("Программа завершена.")
