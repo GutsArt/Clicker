@@ -234,7 +234,7 @@ def check_coins(category):
 def create_json(json_filename, img_path, plus_number, price_number):
     print(json_filename)
     try:
-        with open("All.json", 'r') as file:
+        with open(file_json, 'r') as file:
             data = json.load(file)
     except (FileNotFoundError, json.JSONDecodeError):
         data = {}
@@ -249,7 +249,7 @@ def create_json(json_filename, img_path, plus_number, price_number):
         "efficiency": f"{(int(plus_number) * 100) / int(price_number):.5f}" if price_number != 0 else None
     }
 
-    with open("All.json", 'w') as file:
+    with open(file_json, 'w') as file:
         json.dump(data, file, indent=2)
 
 
@@ -338,12 +338,12 @@ def check_mining_category(category, imgs, n_clicks, max_attempts):
 #         return None, my_coins
 
 
-def find_best_efficiency(my_coins, top_n=3):
+def find_best_efficiency(my_coins, top_n=5):
     try:
         # Преобразуем доступные монеты в целое число, если они не в формате числа
         my_coins = int(my_coins)
 
-        with open("All.json", 'r') as file:
+        with open(file_json, 'r') as file:
             data = json.load(file)
             efficiencies = []
 
@@ -373,7 +373,7 @@ def find_best_efficiency(my_coins, top_n=3):
         return None
 
 
-def smart_find(best_img, max_attempts=30, attempts=0):
+def smart_find(best_img, max_attempts=35, attempts=0):
     while attempts < max_attempts:
         if find_image(best_img):
             break
@@ -433,6 +433,8 @@ def main():
         while CLICKING:
             my_coins = check_coins(categories[0])
 
+            my_coins = my_coins.replace(',', '')
+
             if int(my_coins) <= 1_000_000:
                 return False
             # my_coins = 10_000_000
@@ -441,7 +443,7 @@ def main():
             check_mining_category(categories[1], imgs_Markets, 2, 20)  # 20
             check_mining_category(categories[2], imgs_Legal, 2, 15)  # 15
             check_mining_category(categories[3], imgs_Web3, 2, 15)  # 10
-            check_mining_category(categories[4], imgs_Specials, 6, 30)  # 30
+            check_mining_category(categories[4], imgs_Specials, 6, 35)  # 35
 
             sleep(2)
 
@@ -449,25 +451,26 @@ def main():
             best_images = find_best_efficiency(my_coins)
             for best_img, efficiency, price in best_images:
                 if best_img:
-                    current_find(best_img)
+                    if not current_find(best_img):
+                        break
 
-                    remaining_money = my_coins - price
+                    remaining_money = int(my_coins) - price
                     if remaining_money <= 1_000_000:
                         print("Достаточно денег для завершения работы.")
                         continue
                     else:
-                        print(f"Time: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')} Money: {remaining_money}"
+                        print(f"Time: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')} Money: {remaining_money}\n"
                               f"{remaining_money} <= {1_000_000}")
-                        sleep(sleep_time * 60)
-            '''
-            imgs = [
-                    r"SCREENS\PR&Team\Cointelegraph.png",
-                    r"SCREENS\Markets\Margin trading x50.png",
-                    r"SCREENS\Specials\HamsterStore launch.png",
-            ]
-            for img in imgs:
-                current_find(img)
-            '''
+                        sleep(15)
+
+            # imgs = [
+            #         r"SCREENS\PR&Team\Cointelegraph.png",
+            #         r"SCREENS\Markets\Margin trading x50.png",
+            #         r"SCREENS\Specials\HamsterStore launch.png",
+            # ]
+            # for img in imgs:
+            #     current_find(img)
+
 
         print(datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
         print("Программа завершена.")
