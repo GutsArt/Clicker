@@ -430,14 +430,20 @@ def main():
     try:
         if not find_image("MINING.png"):
             print("Не удалось найти изображение MINING.png, завершение работы.")
+            find_image("Claim.png")
+            find_image("BACK.png")
+            find_image("MINING.png")
         while CLICKING:
             my_coins = check_coins(categories[0])
 
-            my_coins = my_coins.replace(',', '')
+            # my_coins = int(my_coins.replace(',', ''))
+            my_coins = int(my_coins)
 
-            if int(my_coins) <= 1_000_000:
+            if my_coins <= 1_000_000:
                 return False
             # my_coins = 10_000_000
+
+            sleep(2)
 
             check_mining_category(categories[0], imgs, 3, 20)  # 20
             check_mining_category(categories[1], imgs_Markets, 2, 20)  # 20
@@ -448,20 +454,21 @@ def main():
             sleep(2)
 
             # best_img, remaining_money = find_best_efficiency(my_coins)
-            best_images = find_best_efficiency(my_coins)
-            for best_img, efficiency, price in best_images:
-                if best_img:
-                    if not current_find(best_img):
-                        break
-
-                    remaining_money = int(my_coins) - price
-                    if remaining_money <= 1_000_000:
+            for _ in range(3):
+                best_images = find_best_efficiency(my_coins)  # -1e-05
+                for best_img, efficiency, price in best_images:
+                    remaining_money = (my_coins - price)
+                    if remaining_money <= 10_000_000:
                         print("Достаточно денег для завершения работы.")
                         continue
                     else:
                         print(f"Time: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')} Money: {remaining_money}\n"
-                              f"{remaining_money} <= {1_000_000}")
-                        sleep(15)
+                              f"{remaining_money} <= {10_000_000}")
+                        sleep(1)
+                    if best_img:
+                        if not current_find(best_img):
+                            continue
+
 
             # imgs = [
             #         r"SCREENS\PR&Team\Cointelegraph.png",
@@ -470,7 +477,6 @@ def main():
             # ]
             # for img in imgs:
             #     current_find(img)
-
 
         print(datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
         print("Программа завершена.")
