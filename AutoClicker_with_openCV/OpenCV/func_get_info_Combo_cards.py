@@ -464,7 +464,6 @@ def main():
                     else:
                         print(f"Time: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')} Money: {remaining_money}\n"
                               f"{remaining_money} <= {10_000_000}")
-                        sleep(1)
                     if best_img:
                         if not current_find(best_img):
                             continue
