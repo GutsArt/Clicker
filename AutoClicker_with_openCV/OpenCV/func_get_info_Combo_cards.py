@@ -9,7 +9,7 @@ from datetime import datetime
 import threading
 from pynput import keyboard
 
-from configOlha import *
+from config import *
 
 # Укажите путь к Tesseract OCR, если он не находится в системном пути
 pytesseract.pytesseract.tesseract_cmd = r'C:\Users\artem\AppData\Local\Programs\Tesseract-OCR\tesseract'
@@ -447,37 +447,37 @@ def main():
 
             sleep(2)
 
-            # check_mining_category(categories[0], imgs, 3, 20)  # 20
-            # check_mining_category(categories[1], imgs_Markets, 2, 20)  # 20
-            # check_mining_category(categories[2], imgs_Legal, 2, 15)  # 15
-            # check_mining_category(categories[3], imgs_Web3, 2, 15)  # 10
-            # check_mining_category(categories[4], imgs_Specials, 6, 35)  # 35
-            #
-            # sleep(2)
-            #
-            # # best_img, remaining_money = find_best_efficiency(my_coins)
-            # for _ in range(3):
-            #     best_images = find_best_efficiency(my_coins)  # -1e-05
-            #     for best_img, efficiency, price in best_images:
-            #         remaining_money = (my_coins - price)
-            #         if remaining_money <= 10_000_000:
-            #             print("Достаточно денег для завершения работы.")
-            #             continue
-            #         else:
-            #             print(f"Time: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')} Money: {remaining_money}\n"
-            #                   f"{remaining_money} <= {10_000_000}")
-            #         if best_img:
-            #             if not current_find(best_img):
-            #                 continue
+            check_mining_category(categories[0], imgs, 3, 20)  # 20
+            check_mining_category(categories[1], imgs_Markets, 2, 20)  # 20
+            check_mining_category(categories[2], imgs_Legal, 2, 15)  # 15
+            check_mining_category(categories[3], imgs_Web3, 2, 15)  # 10
+            check_mining_category(categories[4], imgs_Specials, 6, 35)  # 35
+
+            sleep(2)
+
+            # best_img, remaining_money = find_best_efficiency(my_coins)
+            for _ in range(3):
+                best_images = find_best_efficiency(my_coins)  # -1e-05
+                for best_img, efficiency, price in best_images:
+                    remaining_money = (my_coins - price)
+                    if remaining_money <= 10_000_000:
+                        print("Достаточно денег для завершения работы.")
+                        continue
+                    else:
+                        print(f"Time: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')} Money: {remaining_money}\n"
+                              f"{remaining_money} <= {10_000_000}")
+                    if best_img:
+                        if not current_find(best_img):
+                            continue
 
 
-            imgs = [
-                r"SCREENS\Specials\Special Hamster Conference.png",
-                r"SCREENS\Specials\X Network 10 Million.png",
-                r"SCREENS\Specials\Telegram Miniapp Launch.png",
-            ]
-            for img in imgs:
-                current_find(img)
+            # imgs = [
+            #     r"SCREENS\Specials\Special Hamster Conference.png",
+            #     r"SCREENS\Specials\X Network 10 Million.png",
+            #     r"SCREENS\Specials\Telegram Miniapp Launch.png",
+            # ]
+            # for img in imgs:
+            #     current_find(img)
 
         print(datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
         print("Программа завершена.")
