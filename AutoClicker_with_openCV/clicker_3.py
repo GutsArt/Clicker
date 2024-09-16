@@ -20,10 +20,13 @@ image_paths = [
     'SCREENS/screen5.png',
     'SCREENS/screen6.png',
     'SCREENS/Error.png',
+    # 'SCREENS/Blue_button.png',
+    'SCREENS/Reward.png',
+    'SCREENS/Claim.png',
 ]
 
 
-def find_and_click_image(image_path, confidence=0.8):
+def find_and_click_image(image_path, region, confidence=0.8):
     try:
         if (button := pyautogui.locateOnScreen(image_path, confidence=confidence, region=region)):
             pyautogui.click(button, button='right')
@@ -35,10 +38,10 @@ def find_and_click_image(image_path, confidence=0.8):
         print(f"Ошибка при обработке {image_path}: {e}")
 
 
-def scroll_Hamster(image_path, scroll_times=20, confidence=0.7):
+def scroll_Hamster(image_path, region, scroll_times=20, confidence=0.7):
     try:
         if (button := pyautogui.locateOnScreen(image_path, confidence=confidence, region=region)):
-            pyautogui.moveTo(button)
+            pyautogui.rightClick(button)
             for _ in range(scroll_times):
                 pyautogui.press('down')
                 pyautogui.sleep(0.1)
@@ -51,7 +54,7 @@ def scroll_Hamster(image_path, scroll_times=20, confidence=0.7):
         print(f"Ошибка при обработке {image_path}: {e}")
 
 
-def click_Hamser(image_path, clicks=10, delay=0.25, confidence=0.75, region=region):
+def click_Hamster(image_path, region, region_energy ,clicks=10, delay=0.25, confidence=0.6):
     click_all = 0
     # while (100 < energy) and (CLICKING):
     #     try:
@@ -79,8 +82,8 @@ def click_Hamser(image_path, clicks=10, delay=0.25, confidence=0.75, region=regi
     #     sleep_time = random.randint(1, 10)
     #     pyautogui.sleep(sleep_time * 60)
     while CLICKING:
-        energy = extract_digits_from_screen()
-        if energy <= 1000:
+        energy = extract_digits_from_screen(region_energy)
+        if energy <= 999:
             print(f"Энергия слишком низкая: {energy}")
             break
 
@@ -89,6 +92,9 @@ def click_Hamser(image_path, clicks=10, delay=0.25, confidence=0.75, region=regi
                 x, y = pyautogui.center(button)
                 x += random.randint(-50, 50)
                 y += random.randint(-50, 50)
+
+                clicks = random.randint(1, 10)
+                delay = random.uniform(0.25, 0.99)
 
                 pyautogui.click(x=x, y=y, clicks=clicks, interval=delay, button='right')
                 time.sleep(delay)
@@ -101,14 +107,17 @@ def click_Hamser(image_path, clicks=10, delay=0.25, confidence=0.75, region=regi
             print(f"Ошибка при обработке {image_path}: {e}")
             break
 
-    if click_all:
+    if not extract_digits_from_screen(region_energy):
+        return False
+    elif click_all:
         current_time = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())
         print(f"Clicks: {click_all} \n Current Time: {current_time}")
         sleep_time = random.randint(1, 10)
         time.sleep(sleep_time * 60)
 
 
-def extract_digits_from_screen(region=(1705, 1010, 30, 15)):
+
+def extract_digits_from_screen(region):
     screenshot = pyautogui.screenshot(region=region)
 
     screenshot = cv2.cvtColor(np.array(screenshot), cv2.COLOR_RGB2BGR)
@@ -153,11 +162,22 @@ def main(image_paths):
     global CLICKING, exit_flag
     while not exit_flag:
         if CLICKING:
-            for path in (image_paths[:4] + [image_paths[6]]):
-                find_and_click_image(path)
-                time.sleep(1)
-            scroll_Hamster(image_paths[4])
-            click_Hamser(image_paths[5])
+            if click_Hamster(image_paths[5], region_0, region_energy_0) == False:
+                for path in (image_paths[:4] + [image_paths[6]]):
+                    find_and_click_image(path, region_0)
+                    time.sleep(1)
+                scroll_Hamster(image_paths[4], region_0)
+                find_and_click_image(image_paths[7], region_0)
+
+
+            if click_Hamster(image_paths[5], region_Olha, region_energy_Olha) == False:
+                for path in (image_paths[:4] + [image_paths[6]]):
+                    find_and_click_image(path, region_Olha)
+                    time.sleep(1)
+                scroll_Hamster(image_paths[4], region_Olha)
+                find_and_click_image(image_paths[7], region_Olha)
+            # print("Karl")
+            # pyautogui.rightClick(x=1800, y=350, clicks=10)
             time.sleep(1 * 60)
         else:
             print("else:")
