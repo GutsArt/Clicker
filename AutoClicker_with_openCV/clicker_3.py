@@ -94,7 +94,7 @@ def click_Hamster(image_path, region, region_energy ,clicks=10, delay=0.25, conf
                 y += random.randint(-50, 50)
 
                 clicks = random.randint(1, 10)
-                delay = random.uniform(0.25, 0.99)
+                delay = random.uniform(0.1, 0.99)
 
                 pyautogui.click(x=x, y=y, clicks=clicks, interval=delay, button='right')
                 time.sleep(delay)
