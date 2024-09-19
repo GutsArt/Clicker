@@ -136,7 +136,7 @@ def get_coin(img_Cipher_Coin, region=region_0, confidence=0.75):
 
 
 def main_cipher_Hamster():
-    if (cipher_code := get_iform_cipher_Hamster() or manual_input()):
+    if (cipher_code := manual_input()):
         print(cipher_code)
         # if open_icon_cipher_Hamster():
         if (clicks_chipher_Hamster(cipher_code, img_Cipher_Red, img_Blue) or open_icon_cipher_Hamster() and clicks_chipher_Hamster(cipher_code, img_Cipher_Red, img_Blue)):
