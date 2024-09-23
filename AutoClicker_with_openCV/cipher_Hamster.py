@@ -107,7 +107,7 @@ def clicks_chipher_Hamster(cipher_code, img_Cipher_Red, img_Blue, region=region_
                     print(symbol)
                     match symbol:
                         case "dot":
-                            time.sleep(interval)  # Перерывать 0.25 секунду
+                            time.sleep(interval)  # Перерывать 0.5 секунду
                             pyautogui.rightClick(button)
                             time.sleep(interval / 2)  # Перерывать 0.25 секунду
                         case "dash":
