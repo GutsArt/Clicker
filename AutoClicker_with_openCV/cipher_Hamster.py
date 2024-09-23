@@ -118,7 +118,7 @@ def clicks_chipher_Hamster(cipher_code, img_Cipher_Red, img_Blue, region=region_
                             pyautogui.mouseUp()
                             time.sleep(interval / 2)  # Перерывать 0.25 секунду
                     # time.sleep(interval * 1)
-                time.sleep(interval * 8)
+                time.sleep(interval * 8) # Перерывать 4 секунду
             return True
     except pyautogui.PyAutoGUIException as e:
         print(f"Ошибка при кликах по коду {cipher_code}: {e}")
