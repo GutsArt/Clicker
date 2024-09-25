@@ -118,7 +118,7 @@ def clicks_chipher_Hamster(cipher_code, img_Cipher_Red, img_Blue, region=region_
                             pyautogui.mouseUp()
                             time.sleep(interval / 2)  # Перерывать 0.25 секунду
                     # time.sleep(interval * 1)
-                time.sleep(interval * 8) # Перерывать 4 секунду
+                time.sleep(interval * 8)  # Перерывать 4 секунду
             return True
     except pyautogui.PyAutoGUIException as e:
         print(f"Ошибка при кликах по коду {cipher_code}: {e}")
@@ -127,7 +127,7 @@ def clicks_chipher_Hamster(cipher_code, img_Cipher_Red, img_Blue, region=region_
 def get_coin(img_Cipher_Coin, region=region_0, confidence=0.75):
     try:
         time.sleep(5)
-        if (button := pyautogui.locateOnScreen(img_Cipher_Coin,region=region_0, confidence=confidence)):
+        if (button := pyautogui.locateOnScreen(img_Cipher_Coin, region=region_0, confidence=confidence)):
             pyautogui.click(button)
             print("+1 000 000")
             return True
@@ -139,40 +139,16 @@ def main_cipher_Hamster():
     if (cipher_code := manual_input()):
         print(cipher_code)
         # if open_icon_cipher_Hamster():
-        if (clicks_chipher_Hamster(cipher_code, img_Cipher_Red, img_Blue) or open_icon_cipher_Hamster() and clicks_chipher_Hamster(cipher_code, img_Cipher_Red, img_Blue)):
+        if (clicks_chipher_Hamster(cipher_code, img_Cipher_Red,
+                                   img_Blue) or open_icon_cipher_Hamster() and clicks_chipher_Hamster(cipher_code,
+                                                                                                      img_Cipher_Red,
+                                                                                                      img_Blue)):
             if (get_coin(img_Cipher_Coin)):
                 print('\033[32m Success with Hamster cipher \033[0m')
 
                 open_icon_cipher_Hamster()
                 return True
-            # else:
-            #     if open_icon_cipher_Hamster():
-            #         if (clicks_chipher_Hamster(cipher_code, img_Cipher_Red, img_Blue)):
-            #             if (get_coin(img_Cipher_Coin)):
-            #                 print('\033[32m Success with Hamster cipher \033[0m')
-            #
-            #                 open_icon_cipher_Hamster()
-            #                 return True
 
 
 if __name__ == "__main__":
     main_cipher_Hamster()
-    # pyautogui.alert("Cipher Hamster has been started!")
-
-    """link = f"https://sumorb.com/crypto/hamster-kombat-daily-cipher-and-combo-code-for-{day}-{month}-2024/"
-    response = requests.get(link)
-
-    if response.status_code == 200:
-        # Обработка первой ссылки
-        soup = BeautifulSoup(response.content, "html.parser")
-        # Парсинг данных...
-    elif response.status_code != 200:
-        # Переход ко второй ссылке, если первая не сработала
-        link1 = f"https://hindijankaripur.com/hamster-kombat-daily-cipher-{month}-{day}/"
-        response = requests.get(link1)
-
-        if response.status_code == 200:
-            soup = BeautifulSoup(response.content, "html.parser")
-            morse_codes = soup.find_all()  # Укажите нужные параметры для поиска
-        else:
-            print("Failed to retrieve the webpage from both links.")"""
