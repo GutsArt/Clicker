@@ -14,43 +14,10 @@ img_Blue = r"SCREENS\ScreenBlue.png"
 
 
 def get_iform_cipher_Hamster():
-    from datetime import datetime
-    now = datetime.now()
-    day = now.day
-    # month = now.strftime("%B").lower()
-    # link = f"https://sumorb.com/crypto/hamster-kombat-daily-cipher-and-combo-code-for-{day}-{month}-2024/"
-    # print(link)
-    # response = requests.get(link)
-    # if response.status_code == 200:
-    #     soup = BeautifulSoup(response.content, "html.parser")
-    #     if (ul_element := soup.find_all("ul", class_="wp-block-list")[1]):
-    #         cipher_codes = []
-    #         li_elements = ul_element.find_all("li")
-    #         for li in li_elements:
-    #             # Extract text within parentheses
-    #             text = li.get_text()
-    #             print(text)
-    #             start = text.find("(")
-    #             end = text.find(")")
-    #             if start != -1 and end != -1:
-    #                 cipher_code = text[start + 1:end]
-    #                 cipher_codes.append(cipher_code)
-    #         return cipher_codes
-
-    # link = f"https://www.cybersport.ru/tags/games/shifr-v-khomiake-na-{day}-sentiabria-hamster-kombat"
-    # print(link)
-    # response = requests.get(link)
-    # if response.status_code == 200:
-    #     soup = BeautifulSoup(response.content, "html.parser")
-    #     print(soup.prettify())  # Вывод содержимого страницы
-    #     # if (_element := soup.find_all())
-    #     # else:
-    #     #     print("Error: wp-block-list not find")
-    #     #     return None
-    # else:
-    #     print("Failed to retrieve the webpage.")
-    #     print(f"Ошибка: {response.status_code}")
-    #     return None
+    # from datetime import datetime
+    # now = datetime.now()
+    # day = now.day
+    pass
 
 
 def manual_input():
