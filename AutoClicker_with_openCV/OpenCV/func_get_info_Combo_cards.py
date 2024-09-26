@@ -301,43 +301,6 @@ def check_mining_category(category, imgs, n_clicks, max_attempts):
     return True
 
 
-# def find_best_efficiency(my_coins):
-#     try:
-#         # Преобразуем доступные монеты в целое число, если они не в формате числа
-#         my_coins = int(my_coins)
-#
-#         with open("PR&Team.json", 'r') as file:
-#             data = json.load(file)
-#             best_efficiency = 0
-#             best_image = None
-#             best_price = None
-#
-#             for img_path, values in data["PR&Team"].items():
-#                 try:
-#                     efficiency = float(values["efficiency"])
-#                     price = int(values["price"])  # Преобразуем цену в целое число
-#
-#                     if efficiency > best_efficiency and price <= my_coins:
-#                         best_efficiency = efficiency
-#                         best_image = img_path
-#                         best_price = price
-#                 except ValueError:
-#                     print(f"Невозможно преобразовать цену в целое число для {img_path}: {values['price']}")
-#                     continue  # Пропускаем итерацию, если цена не является числом
-#
-#             if best_image:
-#                 remaining_coins = my_coins - best_price
-#                 print(f"Лучшее изображение: {best_image} с эффективностью: {best_efficiency}")
-#                 print(f"Цена: {best_price}, оставшиеся монеты: {remaining_coins}")
-#                 return best_image, remaining_coins
-#             else:
-#                 print("Не найдено изображение с наилучшей эффективностью в пределах доступных монет.")
-#                 return None, my_coins
-#     except Exception as e:
-#         print(f"Ошибка при поиске лучшей эффективности: {str(e)}")
-#         return None, my_coins
-
-
 def find_best_efficiency(my_coins, top_n=5):
     try:
         # Преобразуем доступные монеты в целое число, если они не в формате числа
